@@ -5,7 +5,7 @@ interface UserState {
   userName: string
   points: number
   updateName: (newName: string) => void
-  addPoint: () => void
+  addPoint: (amount: number) => void
 }
 
 // 2. Create the "Shared Brain" (The Store)
@@ -17,5 +17,5 @@ export const useUserStore = create<UserState>((set) => ({
   updateName: (newName) => set({ userName: newName }),
 
   // Action to increment points
-  addPoint: () => set((state) => ({ points: state.points + 1 })),
+  addPoint: (amount) => set((state) => ({ points: state.points + amount })),
 }))
