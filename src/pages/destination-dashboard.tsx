@@ -44,14 +44,14 @@ export const DestinationDashboard = () => {
   const addMutation = useMutation({
     onSuccess: (newlyCreatedItem) => {
     // 1. Get the current list from the cache
-    const oldData = queryClient.getQueryData(['destinations']);
+    const oldData = queryClient.getQueryData(['clients']);
 
     // 2. Manually push the new item into the cache
     if (oldData) {
-      queryClient.setQueryData(['destinations'], (old: any) => [newlyCreatedItem, ...old]);
+      queryClient.setQueryData(['clients'], (old: any) => [newlyCreatedItem, ...old]);
     }
 
-    alert('Destination added to UI!');
+    alert('Client added to UI!');
     setTitle('');
   }
   });
@@ -62,7 +62,7 @@ export const DestinationDashboard = () => {
       await fetch(`https://jsonplaceholder.typicode.com/posts/${id}`, { method: 'DELETE' });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['destinations'] });
+      queryClient.invalidateQueries({ queryKey: ['clients'] });
       // If we deleted the one we were looking at, close the sidebar
       setSelectedId(null); 
     }

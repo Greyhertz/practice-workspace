@@ -15,7 +15,6 @@ import {
 import Expense from "./sub-pages/expense";
 import Analytics from "./sub-pages/analytics";
 import MiniCRM from "./sub-pages/mini-crm";
-import Booking from "./sub-pages/booking";
 import { Button } from "../components/ui/button";
 import {
   Card,
@@ -24,6 +23,7 @@ import {
   CardTitle,
 } from "../components/ui/card";
 import { useUserStore } from "../store/useUserStore"; // Import the store
+import Booking from "./sub-pages/booking";
 
 const projects = [
   {
@@ -64,6 +64,13 @@ const projects = [
   {
     id: "tasks",
     label: "Task Manager",
+    icon: CheckSquare,
+    description: "Practice status changes and persistence.",
+    page: <Booking />,
+  },
+   {
+    id: "bookings",
+    label: "Manage Bookings",
     icon: CheckSquare,
     description: "Practice status changes and persistence.",
     page: <Booking />,
