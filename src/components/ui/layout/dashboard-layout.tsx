@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import {
   BarChart3,
+  Book,
   Calculator,
   CheckSquare,
   ChevronRight,
@@ -22,6 +23,7 @@ import MiniCRM from "@/pages/sub-pages/mini-crm"; // Fixed import
 import { useUserStore } from "@/store/useUserStore";
 import { Button } from "../button";
 import { Card, CardHeader, CardTitle, CardContent } from "../card";
+import TaskManager from "@/pages/sub-pages/task-manger";
 
 const projects = [
   {
@@ -70,6 +72,14 @@ const projects = [
     icon: CheckSquare,
     description: "Practice status changes and persistence.",
     path: "/dashboard/task-manager",
+    component: <TaskManager />,
+  },
+  {
+    id: "bookings",
+    label: "Manage Bookings",
+    icon: Book,
+    description: "Practice status changes and persistence.",
+    path: "/dashboard/bookings",
     component: <Booking />,
   },
 ];
@@ -88,7 +98,7 @@ export default function Dashboard() {
       <div className="min-h-screen bg-background text-foreground transition-colors duration-300">
         <div className="flex min-h-screen">
           {/* Sidebar */}
-          <aside className="hidden w-64 border-r bg-card md:block">
+          <aside className="hidden w-64 border-r bg-background md:block">
             <div className="sticky top-0 flex h-screen flex-col">
               <div className="flex h-16 items-center gap-2 border-b px-5">
                 <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
@@ -111,7 +121,7 @@ export default function Dashboard() {
                       className={`flex w-full items-center gap-3 rounded-md px-3 py-2 text-left text-sm transition-all ${
                         isSelected
                           ? "bg-primary text-primary-foreground font-medium shadow-sm"
-                          : "text-muted-foreground hover:bg-accent hover:text-foreground"
+                          : "text-muted-primary hover:bg-accent hover:text-foreground"
                       }`}
                     >
                       <Icon className="h-4 w-4 shrink-0" />
@@ -136,7 +146,7 @@ export default function Dashboard() {
           </aside>
 
           <main className="flex-1 flex flex-col">
-            <header className="flex h-16 items-center justify-between border-b bg-card/50 backdrop-blur px-5 md:px-8">
+            <header className="flex h-16 items-center justify-between border-b bg-card/50 backdrop-blur px-5 md:px-8 sticky top-0 ">
               <div>
                 <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-bold">Practice Lab</p>
                 <h1 className="text-sm font-semibold">{current?.label}</h1>
@@ -171,7 +181,7 @@ export default function Dashboard() {
                         value={userName}
                         onChange={(e) => useUserStore.getState().updateName(e.target.value)}
                       />
-                      <Button variant="default" onClick={() => useUserStore.getState().addPoint()}>
+                      <Button variant="default" onClick={() => useUserStore.getState().addPoint}>
                         Earn 1 Point
                       </Button>
                     </CardContent>
