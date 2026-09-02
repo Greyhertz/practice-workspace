@@ -1,21 +1,24 @@
 import { create } from 'zustand'
-
-// 1. Define what the data looks like
+import { persist } from 'zustand/middleware'
+import { useAuthStore } from './useAuthStore';
 interface UserState {
-  userName: string
-  points: number
-  updateName: (newName: string) => void
+  userName: string;
+  points: number;
+  updateName: (newName: string) => void;
   addPoint: (amount: number) => void
 }
 
-// 2. Create the "Shared Brain" (The Store)
-export const useUserStore = create<UserState>((set) => ({
-  userName: "New Developer",
-  points: 0,
+// const currentUser = useAuthStore.getState().currentUser?.name || 'Guest';
+const currentUser = useAuthStore.getState().currentUser;
+export const useUserStore = create<UserState>()(
+  persist(
+    (set) => ({
+      userName: currentUser?.name || 'Guest',
+      points: 0,
+      updateName: (newName) => set({ userName: newName }),
+      addPoint: (amount) => set((state) => ({ points: state.points + amount })),
+    }),
+    { name: 'user-xp-storage' }
+  )
+)
 
-  // Action to change the name
-  updateName: (newName) => set({ userName: newName }),
-
-  // Action to increment points
-  addPoint: (amount) => set((state) => ({ points: state.points + amount })),
-}))

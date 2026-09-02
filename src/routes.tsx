@@ -7,30 +7,41 @@ import Expense from "./pages/sub-pages/expense";
 import { HomePage } from "./pages/home-page";
 import Booking from "./pages/sub-pages/booking";
 import TaskManager from "./pages/sub-pages/task-manger";
+import SignUpPage from "./pages/signup-page";
+import LoginPage from "./pages/login-page";
+import ProtectedRoute from "./components/protectedRoute";
+import { ClientDetails } from "./pages/sub-pages/client-details";
+// import {SignUpPage} from "./pages/signup-page";
 
 export const router = createBrowserRouter([
   {
-    path: '/',
+    path: "/",
     element: <MainLayout />,
     children: [
-      { index: true, element: <HomePage />},
+      { index: true, element: <HomePage /> },
+      { path: "sign-up", element: <SignUpPage /> },
+      { path: "login", element: <LoginPage /> },
       // { path: '*', element: <NotFound /> },
     ],
   },
 
-  {path:'/dashboard',element : <DashboardLayout/>,
+  {
+    path: "/dashboard",
+    element: (
+      <ProtectedRoute>
+        <DashboardLayout />
+      </ProtectedRoute>
+    ),
     children: [
-      {path: 'analytics', element: <Analytics />},
-      {path: 'clients', element: <MiniCRM />},
-      {path: 'expenses', element: <Expense />},
-      {path: 'bookings', element: <Booking />},
-      {path: 'task-manager', element: <TaskManager />},
-      // {path: 'analytics', element: <Analytics />},
-    ]
-    
-  }
-
-  
+      { index: true, element: <Analytics /> },
+      { path: "analytics", element: <Analytics /> },
+      { path: "clients", element: <MiniCRM /> },
+      { path: "clients/:id", element: <ClientDetails /> },
+      { path: "expenses", element: <Expense /> },
+      { path: "bookings", element: <Booking /> },
+      { path: "task-manager", element: <TaskManager /> },
+    ],
+  },
 
   // Legacy standalone admin route
   // {
@@ -43,7 +54,6 @@ export const router = createBrowserRouter([
   // },
 
   // // Dashboard (protected)
-
 
   // { path: '/form', element: <UseQueryForm /> },
 ]);

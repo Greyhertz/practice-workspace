@@ -7,6 +7,7 @@ import {
   ChevronRight,
   CircleDollarSign,
   LayoutDashboard,
+  LogOut,
   Moon,
   Sun,
   Users,
@@ -24,6 +25,7 @@ import { useUserStore } from "@/store/useUserStore";
 import { Button } from "../button";
 import { Card, CardHeader, CardTitle, CardContent } from "../card";
 import TaskManager from "@/pages/sub-pages/task-manger";
+import { useAuthStore } from "@/store/useAuthStore";
 
 const projects = [
   {
@@ -89,9 +91,11 @@ export default function Dashboard() {
   const location = useLocation();
   const userName = useUserStore((state) => state.userName);
   const points = useUserStore((state) => state.points);
-
+  const currentUser = useAuthStore((state) => state.currentUser);
+  const logout = useAuthStore((state) => state.logout);
   // Find the current project based on the URL
-  const current = projects.find((p) => p.path === location.pathname) || projects[0];
+  const current =
+    projects.find((p) => p.path === location.pathname) || projects[0];
 
   return (
     <div className={dark ? "dark" : ""}>
@@ -106,7 +110,9 @@ export default function Dashboard() {
                 </div>
                 <div>
                   <p className="text-sm font-semibold">Practice Workspace</p>
-                  <p className="text-xs text-muted-foreground">Build. Break. Learn.</p>
+                  <p className="text-xs text-muted-foreground">
+                    Build. Break. Learn.
+                  </p>
                 </div>
               </div>
 
@@ -132,14 +138,26 @@ export default function Dashboard() {
               </nav>
 
               <div className="border-t px-5 py-4 bg-muted/30">
-                <p className="text-sm font-bold text-primary truncate">{userName}</p>
-                <p className="text-xs text-muted-foreground">Exp: {points} points</p>
+                <p className="text-sm font-bold text-primary truncate">
+                  {userName}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  Exp: {points} points
+                </p>
               </div>
 
               <div className="p-3 border-t">
-                <Button variant="ghost" className="w-full justify-start" onClick={() => setDark(!dark)}>
-                    {dark ? <Sun className="mr-2 h-4 w-4 text-yellow-500" /> : <Moon className="mr-2 h-4 w-4" />}
-                    {dark ? "Light mode" : "Dark mode"}
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start"
+                  onClick={() => setDark(!dark)}
+                >
+                  {dark ? (
+                    <Sun className="mr-2 h-4 w-4 text-yellow-500" />
+                  ) : (
+                    <Moon className="mr-2 h-4 w-4" />
+                  )}
+                  {dark ? "Light mode" : "Dark mode"}
                 </Button>
               </div>
             </div>
@@ -148,19 +166,63 @@ export default function Dashboard() {
           <main className="flex-1 flex flex-col">
             <header className="flex h-16 items-center justify-between border-b bg-card/50 backdrop-blur px-5 md:px-8 sticky top-0 ">
               <div>
-                <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-bold">Practice Lab</p>
+                <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-bold">
+                  Practice Lab
+                </p>
                 <h1 className="text-sm font-semibold">{current?.label}</h1>
               </div>
-              <Button variant="outline" size="sm" onClick={() => setDark(!dark)}>
-                {dark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-              </Button>
+
+              <div className="ml-auto flex items-center gap-3">
+                <div className="flex gap-3 p-2 bg-muted/50 rounded-xl">
+                  <div className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold">
+                    {/* Show first letter of name */}
+                    {currentUser?.name?.charAt(0).toUpperCase() || "U"}
+                  </div>
+                  <div className="overflow-hidden">
+                    <p className="text-sm font-bold truncate">
+                      {currentUser?.name || "Guest"}
+                    </p>
+                    <p className="text-[10px] text-muted-foreground truncate">
+                      {currentUser?.email}
+                    </p>
+                  </div>
+                </div>
+                <Button
+                  variant="ghost"
+                  className="text-red-500 hover:text-red-600 hover:bg-red-50"
+                  onClick={() => {
+                    logout();
+                    // The ProtectedRoute will automatically redirect to /login
+                  }}
+                >
+                  <LogOut className="mr-2 h-4 w-4" />
+                  Logout
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setDark(!dark)}
+                >
+                  {dark ? (
+                    <Sun className="h-4 w-4" />
+                  ) : (
+                    <Moon className="h-4 w-4" />
+                  )}
+                </Button>
+              </div>
             </header>
 
             <div className="mx-auto w-full max-w-6xl p-5 md:p-8">
               <div className="mb-8">
-                <p className="mb-2 text-sm font-medium text-muted-foreground text-blue-600">Current playground</p>
-                <h2 className="text-3xl font-bold tracking-tight">{current?.label}</h2>
-                <p className="mt-1 max-w-2xl text-sm text-muted-foreground">{current?.description}</p>
+                <p className="mb-2 text-sm font-medium text-muted-foreground text-blue-600">
+                  Current playground
+                </p>
+                <h2 className="text-3xl font-bold tracking-tight">
+                  {current?.label}
+                </h2>
+                <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
+                  {current?.description}
+                </p>
               </div>
 
               {/* RENDER LOGIC */}
@@ -179,9 +241,14 @@ export default function Dashboard() {
                         className="p-2 border rounded-md text-sm bg-background"
                         placeholder="Change your name..."
                         value={userName}
-                        onChange={(e) => useUserStore.getState().updateName(e.target.value)}
+                        onChange={(e) =>
+                          useUserStore.getState().updateName(e.target.value)
+                        }
                       />
-                      <Button variant="default" onClick={() => useUserStore.getState().addPoint}>
+                      <Button
+                        variant="default"
+                        onClick={() => useUserStore.getState().addPoint}
+                      >
                         Earn 1 Point
                       </Button>
                     </CardContent>
@@ -198,12 +265,17 @@ export default function Dashboard() {
                               <div className="mb-2 flex h-9 w-9 items-center justify-center rounded-md border bg-muted/50">
                                 <Icon className="h-4 w-4" />
                               </div>
-                              <CardTitle className="text-base">{project.label}</CardTitle>
+                              <CardTitle className="text-base">
+                                {project.label}
+                              </CardTitle>
                             </CardHeader>
                             <CardContent>
-                              <p className="text-sm text-muted-foreground">{project.description}</p>
+                              <p className="text-sm text-muted-foreground">
+                                {project.description}
+                              </p>
                               <div className="mt-4 flex items-center text-xs font-medium text-blue-600">
-                                Open playground <ChevronRight className="ml-1 h-3 w-3" />
+                                Open playground{" "}
+                                <ChevronRight className="ml-1 h-3 w-3" />
                               </div>
                             </CardContent>
                           </Card>
