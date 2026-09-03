@@ -40,6 +40,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Link, useNavigate } from "react-router-dom";
 
 // 1. ZOD SCHEMA
 const clientSchema = z.object({
@@ -56,7 +57,7 @@ const MiniCRM = () => {
   const queryClient = useQueryClient();
   const points = useUserStore((state) => state.points);
   const addPoint = useUserStore((state) => state.addPoint);
-
+  const navigate = useNavigate()
   // 2. REACT HOOK FORM SETUP
   const form = useForm<ClientFormValues>({
     resolver: zodResolver(clientSchema),
@@ -269,10 +270,12 @@ const MiniCRM = () => {
           <div className="grid gap-3">
             {/* REPLACE THIS PLACEHOLDER WITH data?.map(...) FROM useQuery */}
             {clients?.map((client: any) => (
-              <Card
-                key={client.id}
-                className="hover:border-blue-200 transition-colors cursor-pointer group"
-              >
+              <Link to={`/dashboard/clients/${client.id}`} state={client}>
+                <Card
+                  key={client.id}
+                  className="hover:border-blue-200 transition-colors cursor-pointer group"
+                >
+
                 <CardContent className="p-4 flex items-center justify-between">
                   <div className="flex items-center gap-4">
                     <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center font-bold text-muted-foreground">
@@ -307,6 +310,7 @@ const MiniCRM = () => {
                   </div>
                 </CardContent>
               </Card>
+              </Link>
             ))}
           </div>
         </div>

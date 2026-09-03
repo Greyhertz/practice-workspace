@@ -6,6 +6,7 @@ export interface TaskItem {
   title: string;
   priority: "High" | "Medium" | "Low";
   status: "Backlog" | "In Progress" | "Completed";
+  clientId: number;
 }
 
 export const useTasks = () => {
@@ -17,8 +18,18 @@ export const useTasks = () => {
     if (saved) return JSON.parse(saved);
     // Default data if storage is empty
     return [
-      { id: 1, title: "Secure Base Camp", priority: "High", status: "Completed" },
-      { id: 2, title: "Gather Food Supplies", priority: "High", status: "Backlog" },
+      {
+        id: 1,
+        title: "Secure Base Camp",
+        priority: "High",
+        status: "Completed",
+      },
+      {
+        id: 2,
+        title: "Gather Food Supplies",
+        priority: "High",
+        status: "Backlog",
+      },
     ];
   });
 
@@ -29,14 +40,32 @@ export const useTasks = () => {
     localStorage.setItem("expedition-tasks", JSON.stringify(tasks));
   }, [tasks]);
 
-  const addTask = (title: string, priority: TaskItem["priority"]) => {
-    if(title.trim() === "") return alert("Add a title! Title cannot be empty!"); // Prevent adding empty tasks
-    const newTask: TaskItem = { id: Date.now(), title, priority, status: "Backlog" };
+  const addTask = (
+    title: string,
+    priority: TaskItem["priority"],
+    clientId: number,
+  ) => {
+    if (title.trim() === "")
+      return alert("Add a title! Title cannot be empty!"); // Prevent adding empty tasks
+    const newTask: TaskItem = {
+      id: Date.now(),
+      title,
+      priority,
+      status: "Backlog",
+      clientId,
+    };
     setTasks([newTask, ...tasks]);
+    if (clientId) {
+      addPoint(15);
+    } else {
+      addPoint(5);
+    }
   };
 
   const removeTask = (taskId: number) => {
-    setTasks(prev => prev.filter(t => t.id !== taskId));
+    if (window.confirm("Are you sure you want to delete this task?")) {
+      setTasks((prev) => prev.filter((t) => t.id !== taskId));
+    }
   };
 
   const clickToComplete = (taskId: number) => {
@@ -49,24 +78,45 @@ export const useTasks = () => {
           Completed: "Completed",
         };
         const nextState = nextStatus[task.status];
-        if (task.status !== "Completed" && nextState === "Completed") addPoint(20);
+        if (task.status !== "Completed" && nextState === "Completed")
+          addPoint(20);
         return { ...task, status: nextState };
       }),
     );
   };
 
   const clearAll = () => {
-    if (window.confirm("Are you sure?")) setTasks([]);
+    if (window.confirm("Are you sure you want to clear all tasks?")) {
+      setTasks([]);
+    }
   };
 
   // 3. ANALYTICS
-  const filteredTasks = tasks.filter(t => t.title.toLowerCase().includes(search.toLowerCase()));
-  const completionRate = tasks.length ? Math.round((tasks.filter(t => t.status === "Completed").length / tasks.length) * 100) : 0;
+  const filteredTasks = tasks.filter((t) =>
+    t.title.toLowerCase().includes(search.toLowerCase()),
+  );
+  const completionRate = tasks.length
+    ? Math.round(
+        (tasks.filter((t) => t.status === "Completed").length / tasks.length) *
+          100,
+      )
+    : 0;
   const efficiencyScore = tasks.reduce((acc, curr) => {
     if (curr.status === "Completed") return acc + 10;
     if (curr.status === "In Progress") return acc + 5;
     return acc;
   }, 0);
 
-  return { tasks, search, setSearch, filteredTasks, addTask, removeTask, clickToComplete, clearAll, completionRate, efficiencyScore };
+  return {
+    tasks,
+    search,
+    setSearch,
+    filteredTasks,
+    addTask,
+    removeTask,
+    clickToComplete,
+    clearAll,
+    completionRate,
+    efficiencyScore,
+  };
 };

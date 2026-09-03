@@ -20,6 +20,8 @@
     --muted-foreground: 240 4% 46%;
     --accent: 240 5% 94%;
     --accent-foreground: 240 6% 10%;
+    --destructive: 0 72% 50%;
+    --destructive-foreground: 0 0% 100%;
     --border: 240 6% 90%;
     --input: 240 6% 90%;
     --ring: 240 5% 65%;
@@ -41,6 +43,8 @@
     --muted-foreground: 240 5% 65%;
     --accent: 240 5% 14%;
     --accent-foreground: 0 0% 98%;
+    --destructive: 0 72% 50%;
+    --destructive-foreground: 0 0% 100%;
     --border: 240 4% 16%;
     --input: 240 4% 16%;
     --ring: 240 5% 65%;
@@ -55,7 +59,8 @@
     font-family: "Inter", ui-sans-serif, system-ui, sans-serif;
   }
 
-  code, pre {
+  code,
+  pre {
     font-family: "JetBrains Mono", ui-monospace, monospace;
   }
 }

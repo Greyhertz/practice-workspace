@@ -13,13 +13,13 @@ import {
   Users,
   WalletCards,
 } from "lucide-react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, Outlet, useLocation } from "react-router-dom";
 
 // Sub-pages
 import Expense from "@/pages/sub-pages/expense";
 import Analytics from "@/pages/sub-pages/analytics";
 import Booking from "@/pages/sub-pages/booking";
-import MiniCRM from "@/pages/sub-pages/mini-crm"; // Fixed import
+import MiniCRM from "@/pages/sub-pages/mini-crm";
 
 import { useUserStore } from "@/store/useUserStore";
 import { Button } from "../button";
@@ -34,7 +34,7 @@ const projects = [
     icon: LayoutDashboard,
     description: "Your practice command center.",
     path: "/dashboard",
-    component: null, // Dashboard is the index
+    component: null,
   },
   {
     id: "expenses",
@@ -93,9 +93,15 @@ export default function Dashboard() {
   const points = useUserStore((state) => state.points);
   const currentUser = useAuthStore((state) => state.currentUser);
   const logout = useAuthStore((state) => state.logout);
-  // Find the current project based on the URL
-  const current =
-    projects.find((p) => p.path === location.pathname) || projects[0];
+
+  // LOGIC FIX 1: Find the current project based on path hierarchy.
+  // We reverse the check so more specific paths (like /dashboard/clients)
+  // are found before the general /dashboard path.
+   const current =
+    [...projects].reverse().find((p) => 
+      p.id !== "dashboard" && location.pathname.startsWith(p.path)
+    ) || projects[0];
+
 
   return (
     <div className={dark ? "dark" : ""}>
@@ -119,7 +125,13 @@ export default function Dashboard() {
               <nav className="flex-1 space-y-1 overflow-y-auto p-3">
                 {projects.map((project) => {
                   const Icon = project.icon;
-                  const isSelected = location.pathname === project.path;
+
+                  // LOGIC FIX 2: Ensure sidebar stays highlighted for sub-pages
+                  const isSelected =
+                    project.id === "dashboard"
+                      ? location.pathname === "/dashboard"
+                      : location.pathname.startsWith(project.path);
+
                   return (
                     <Link
                       key={project.id}
@@ -175,7 +187,6 @@ export default function Dashboard() {
               <div className="ml-auto flex items-center gap-3">
                 <div className="flex gap-3 p-2 bg-muted/50 rounded-xl">
                   <div className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold">
-                    {/* Show first letter of name */}
                     {currentUser?.name?.charAt(0).toUpperCase() || "U"}
                   </div>
                   <div className="overflow-hidden">
@@ -189,11 +200,8 @@ export default function Dashboard() {
                 </div>
                 <Button
                   variant="ghost"
-                  className="text-red-500 hover:text-red-600 hover:bg-red-50"
-                  onClick={() => {
-                    logout();
-                    // The ProtectedRoute will automatically redirect to /login
-                  }}
+                  className="text-destructive hover:text-red-600 hover:bg-red-50"
+                  onClick={() => logout()}
                 >
                   <LogOut className="mr-2 h-4 w-4" />
                   Logout
@@ -228,7 +236,6 @@ export default function Dashboard() {
               {/* RENDER LOGIC */}
               {location.pathname === "/dashboard" ? (
                 <div className="space-y-6">
-                  {/* ZUSTAND PRACTICE SECTION */}
                   <Card className="bg-blue-50 dark:bg-blue-950/20 border-blue-200 dark:border-blue-900">
                     <CardHeader>
                       <CardTitle className="text-sm flex items-center gap-2">
@@ -247,14 +254,14 @@ export default function Dashboard() {
                       />
                       <Button
                         variant="default"
-                        onClick={() => useUserStore.getState().addPoint}
+                        // LOGIC FIX 3: Added () to call the function
+                        onClick={() => useUserStore.getState().addPoint(1)}
                       >
                         Earn 1 Point
                       </Button>
                     </CardContent>
                   </Card>
 
-                  {/* PROJECT GRID */}
                   <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                     {projects.slice(1).map((project) => {
                       const Icon = project.icon;
@@ -286,7 +293,7 @@ export default function Dashboard() {
                 </div>
               ) : (
                 <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-                  {current?.component}
+                   <Outlet />
                 </div>
               )}
             </div>

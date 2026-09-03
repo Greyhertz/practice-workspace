@@ -6,7 +6,7 @@ import { useAuthStore } from "@/store/useAuthStore";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { UserPlus, Mail } from "lucide-react";
 import { useForm } from "react-hook-form";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import z from "zod";
 import { Lock } from "lucide-react";
 
@@ -52,7 +52,6 @@ const handleLogin = (data: any) => {
     }
 }
 
-
 return (
   <div>
 
@@ -78,7 +77,7 @@ return (
                       <FormControl>
                         <Input placeholder="john@example.com" {...field} />
                       </FormControl>
-                      <FormMessage className="text-destructive" />
+                      <FormMessage className="text-xs font-light" />
                     </FormItem>
                   )}
                 />
@@ -101,7 +100,7 @@ return (
                           />
                         </div>
                       </FormControl>
-                      <FormMessage />
+                      <FormMessage className="text-xs font-light"/>
                     </FormItem>
                   )}
                 />
@@ -109,6 +108,7 @@ return (
                 <Button type="submit" className="w-full">
                   Login
                 </Button>
+                  <p className="text-sm">no account yet? <Link to="/sign-up" className="hover:underline text-destructive">SIGN-UP</Link></p>
               </form>
             </Form>
           </CardContent>
