@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useUserStore } from "@/store/useUserStore";
+import { useActivityStore } from "@/store/useActivityStore";
 
 export interface TaskItem {
   id: number;
@@ -11,7 +12,8 @@ export interface TaskItem {
 
 export const useTasks = () => {
   const addPoint = useUserStore((state) => state.addPoint);
-
+  const addLog = useActivityStore((state) => state.addLog);
+  const logs = useActivityStore((state) => state.logs);
   // 1. LAZY INITIALIZATION: Reads from disk ONLY once on boot
   const [tasks, setTasks] = useState<TaskItem[]>(() => {
     const saved = localStorage.getItem("expedition-tasks");
@@ -60,15 +62,21 @@ export const useTasks = () => {
     } else {
       addPoint(5);
     }
+    addLog({ text: `Task "${title}" was created`, type: "task" });
   };
 
   const removeTask = (taskId: number) => {
+    const taskTitle = tasks.find((t) => t.id === taskId)?.title;
     if (window.confirm("Are you sure you want to delete this task?")) {
       setTasks((prev) => prev.filter((t) => t.id !== taskId));
+      addLog({ text: `Task ${taskTitle} has been removed`, type: "task" });
+      console.log(taskTitle)
+      console.log(addLog);
     }
   };
 
   const clickToComplete = (taskId: number) => {
+    const taskStatus = tasks.find((t) => t.id === taskId)?.title;
     setTasks((currentTasks) =>
       currentTasks.map((task) => {
         if (task.id !== taskId) return task;
@@ -78,16 +86,23 @@ export const useTasks = () => {
           Completed: "Completed",
         };
         const nextState = nextStatus[task.status];
-        if (task.status !== "Completed" && nextState === "Completed")
+        if (task.status !== "Completed" && nextState === "Completed") {
+          addLog({
+            text: `Task "${taskStatus}" was completed`,
+            type: "task",
+          });
           addPoint(20);
+        }
         return { ...task, status: nextState };
       }),
     );
+    console.log(addLog);
   };
 
   const clearAll = () => {
     if (window.confirm("Are you sure you want to clear all tasks?")) {
       setTasks([]);
+      addLog({ text: `Cleared al tasks`, type: "task" });
     }
   };
 

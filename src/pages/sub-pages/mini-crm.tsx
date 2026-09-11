@@ -41,11 +41,12 @@ import {
 } from "@/components/ui/select";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate } from "react-router-dom";
+import { useActivityStore } from "@/store/useActivityStore";
 
 // 1. ZOD SCHEMA
 const clientSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
-  email: z.string().email("Please enter a valid email"),
+  email: z.string().trim().email("Please enter a valid email"),
   status: z.enum(["Lead", "Client", "Pro"], {
     required_error: "Please select a status",
   }),
@@ -57,7 +58,7 @@ const MiniCRM = () => {
   const queryClient = useQueryClient();
   const points = useUserStore((state) => state.points);
   const addPoint = useUserStore((state) => state.addPoint);
-  const navigate = useNavigate()
+  const navigate = useNavigate();
   // 2. REACT HOOK FORM SETUP
   const form = useForm<ClientFormValues>({
     resolver: zodResolver(clientSchema),
@@ -80,30 +81,26 @@ const MiniCRM = () => {
     staleTime: 1000 * 60 * 5, // Trust the cache for 5 minutes
     refetchOnWindowFocus: false, // DON'T refetch when I click the alert 'OK'
     refetchOnMount: false, // DON'T refetch when I switch pages and come back
-    refetchOnReconnect: false
+    refetchOnReconnect: false,
   });
 
-//  function saveClientd=s(): SavedTrp[] {
-//   try {
-//     const stored = localStorage.getItem(STORAGE_KEY);
-//     if (!stored) return [];
-//     return JSON.parse(stored);
-//   } catch (error) {
-//     console.error('Error reading saved trips:', error);
-//     return [];
-//   }
-// }
+  const addLog = useActivityStore((state) => state.addLog);
 
   const addMutation = useMutation({
     mutationFn: async (newClient: ClientFormValues) => {
-      const res = await fetch(`https://jsonplaceholder.typicode.com/users`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(newClient),
-      });
-      return res.json();
+      try {
+        const res = await fetch(`https://jsonplaceholder.typicode.com/users`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(newClient),
+        });
+        if (!res) throw new Error("Failed to fetch clients");
+        // return newClient['name'];
+      } catch (error) {
+        return newClient;
+      }
     },
     onSuccess: (newItem) => {
       // 1. Create the object WITH the status FIRST
@@ -121,21 +118,29 @@ const MiniCRM = () => {
       addPoint(10);
       form.reset();
       alert("Success! 10 XP added to your profile.");
+      addLog({
+        text: `Client "${itemWithStatus.name}" was added (+10 XP)`,
+        type: "client",
+      });
     },
   });
 
   const deleteMutation = useMutation({
-    mutationFn: async (id: number) => {
-      await fetch(`https://jsonplaceholder.typicode.com/users/${id}`, {
+    mutationFn: async (client: { id: number; name: string }) => {
+      await fetch(`https://jsonplaceholder.typicode.com/users/${client.id}`, {
         method: "DELETE",
       });
+      return client; // pass it through so onSuccess can use it
     },
-    onSuccess: (_, deletedId) => {
-      // Manually update the cache so the person disappears immediately
+    onSuccess: (deletedClient) => {
       queryClient.setQueryData(["clients"], (oldData: any) => {
-        return oldData?.filter((client: any) => client.id !== deletedId);
+        return oldData?.filter((client: any) => client.id !== deletedClient.id);
       });
       alert("Client removed from view!");
+      addLog({
+        text: `Client "${deletedClient.name}" was removed`,
+        type: "client",
+      });
     },
   });
 
@@ -145,8 +150,6 @@ const MiniCRM = () => {
     // Logic: mutate(data)
 
     addMutation.mutate(data);
-    // Logic: addPoint(10) on success
-    // form.reset();
   };
 
   return (
@@ -275,41 +278,40 @@ const MiniCRM = () => {
                   key={client.id}
                   className="hover:border-blue-200 transition-colors cursor-pointer group"
                 >
-
-                <CardContent className="p-4 flex items-center justify-between">
-                  <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center font-bold text-muted-foreground">
-                      {client.id}
+                  <CardContent className="p-4 flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                      <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center font-bold text-muted-foreground">
+                        {client.id}
+                      </div>
+                      <div>
+                        <p className="font-bold text-sm capitalize">
+                          {client.name}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {client.email}
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      <p className="font-bold text-sm capitalize">
-                        {client.name}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        {client.email}
-                      </p>
-                    </div>
-                  </div>
 
-                  <div className="flex items-center gap-4">
-                    <Badge
-                      variant={
-                        client.status === "Pro" ? "default" : "secondary"
-                      }
-                    >
-                      {client.status || "Lead"}
-                    </Badge>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="text-muted-foreground hover:text-destructive transition-colors"
-                      onClick={() => deleteMutation.mutate(client.id)}
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
+                    <div className="flex items-center gap-4">
+                      <Badge
+                        variant={
+                          client.status === "Pro" ? "default" : "secondary"
+                        }
+                      >
+                        {client.status || "Lead"}
+                      </Badge>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="text-muted-foreground hover:text-destructive transition-colors"
+                        onClick={() => deleteMutation.mutate(client.id)}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
               </Link>
             ))}
           </div>

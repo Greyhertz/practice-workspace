@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import {
+  Activity,
   BarChart3,
   Book,
   Calculator,
@@ -84,6 +85,14 @@ const projects = [
     path: "/dashboard/bookings",
     component: <Booking />,
   },
+  {
+    id: "Feeds",
+    label: "Feeds",
+    icon: Activity,
+    description: "Practice status changes and persistence.",
+    path: "/dashboard/activity-logs",
+    component: <Booking />,
+  },
 ];
 
 export default function Dashboard() {
@@ -97,11 +106,12 @@ export default function Dashboard() {
   // LOGIC FIX 1: Find the current project based on path hierarchy.
   // We reverse the check so more specific paths (like /dashboard/clients)
   // are found before the general /dashboard path.
-   const current =
-    [...projects].reverse().find((p) => 
-      p.id !== "dashboard" && location.pathname.startsWith(p.path)
-    ) || projects[0];
-
+  const current =
+    [...projects]
+      .reverse()
+      .find(
+        (p) => p.id !== "dashboard" && location.pathname.startsWith(p.path),
+      ) || projects[0];
 
   return (
     <div className={dark ? "dark" : ""}>
@@ -293,7 +303,7 @@ export default function Dashboard() {
                 </div>
               ) : (
                 <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-                   <Outlet />
+                  <Outlet />
                 </div>
               )}
             </div>

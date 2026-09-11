@@ -12,6 +12,7 @@ import LoginPage from "./pages/login-page";
 import ProtectedRoute from "./components/protectedRoute";
 import { ClientDetails } from "./pages/sub-pages/client-details";
 import { ProUserPage } from "./pages/sub-pages/pro-user-page";
+import { ActivityFeeds } from "./pages/Activity-Feed";
 // import {SignUpPage} from "./pages/signup-page";
 
 export const router = createBrowserRouter([
@@ -41,7 +42,8 @@ export const router = createBrowserRouter([
       { path: "pro-user", element: <ProUserPage /> },
       { path: "expenses", element: <Expense /> },
       { path: "bookings", element: <Booking /> },
-      { path: "task-manager", element: <TaskManager /> }, 
+      { path: "task-manager", element: <TaskManager /> },
+      {path: "activity-logs", element: <ActivityFeeds />} 
     ],
   },
 
