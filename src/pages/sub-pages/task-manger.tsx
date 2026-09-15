@@ -21,12 +21,23 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import { useAuthStore } from "@/store/useAuthStore";
 
 const TaskManager = () => {
-  const points = useUserStore((state) => state.points);
   const [newTitle, setNewTitle] = useState("");
   const [newPriority, setNewPriority] = useState<any>("Medium");
+  const currentUser = useAuthStore((state) => state.currentUser)
+  const points = useUserStore((state) => {
+    // 1. Get the current user's email
+    currentUser ? (state.pointsByUser[currentUser.email] ?? 0) : 0;
+    const userEmail = currentUser?.email;
 
+    if (!userEmail) return 0; // Default to 0 XP if no one is logged in
+
+    // 2. Look up this user's specific points from the new map structure
+    // (Falling back to 0 XP if this user doesn't have a record yet)
+    return state.pointsByUser?.[userEmail] || 0;
+  });
   const {
     search,
     setSearch,
@@ -113,7 +124,7 @@ const TaskManager = () => {
               </Select>
               <Button
                 onClick={() => {
-                  addTask(newTitle, newPriority);
+                  addTask(newTitle, newPriority, "Pending");
                   setNewTitle("");
                 }}
               >

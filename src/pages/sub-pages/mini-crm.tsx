@@ -42,6 +42,8 @@ import {
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate } from "react-router-dom";
 import { useActivityStore } from "@/store/useActivityStore";
+import { useAuthStore } from "@/store/useAuthStore";
+import { useClientStorageKey } from "@/hooks/use-storage-key";
 
 // 1. ZOD SCHEMA
 const clientSchema = z.object({
@@ -56,7 +58,19 @@ type ClientFormValues = z.infer<typeof clientSchema>;
 
 const MiniCRM = () => {
   const queryClient = useQueryClient();
-  const points = useUserStore((state) => state.points);
+  const currentUser = useAuthStore((state) => state.currentUser);
+  const storageKey = useClientStorageKey();
+  const points = useUserStore((state) => {
+    // 1. Get the current user's email
+    currentUser ? (state.pointsByUser[currentUser.email] ?? 0) : 0;
+    const userEmail = currentUser?.email;
+
+    if (!userEmail) return 0; // Default to 0 XP if no one is logged in
+
+    // 2. Look up this user's specific points from the new map structure
+    // (Falling back to 0 XP if this user doesn't have a record yet)
+    return state.pointsByUser?.[userEmail] || 0;
+  });
   const addPoint = useUserStore((state) => state.addPoint);
   const navigate = useNavigate();
   // 2. REACT HOOK FORM SETUP
@@ -68,40 +82,79 @@ const MiniCRM = () => {
       status: "Lead",
     },
   });
+  // const points =
 
   const fetchClients = async () => {
-    const res = await fetch("https://jsonplaceholder.typicode.com/users");
-    if (!res.ok) throw new Error("Failed to fetch clients");
-    return res.json();
+    const data = localStorage.getItem(storageKey);
+    return data ? JSON.parse(data) : [];
   };
 
   const { data: clients, isLoading: isLoadingDetails } = useQuery({
-    queryKey: ["clients"],
-    queryFn: async () => fetchClients(),
-    staleTime: 1000 * 60 * 5, // Trust the cache for 5 minutes
+    queryKey: ["clients", storageKey],
+    queryFn: fetchClients,
     refetchOnWindowFocus: false, // DON'T refetch when I click the alert 'OK'
     refetchOnMount: false, // DON'T refetch when I switch pages and come back
     refetchOnReconnect: false,
   });
 
+  // const { data: clients, isLoading: isLoadingDetails } = useQuery({
+  //   queryKey: ["clients"],
+  //   queryFn: async () => fetchClients(),
+  //   staleTime: 1000 * 60 * 5, // Trust the cache for 5 minutes
+  //   refetchOnWindowFocus: false, // DON'T refetch when I click the alert 'OK'
+  //   refetchOnMount: false, // DON'T refetch when I switch pages and come back
+  //   refetchOnReconnect: false,
+  // });
+
   const addLog = useActivityStore((state) => state.addLog);
 
-  const addMutation = useMutation({
+  // const addMutation = useMutation({
+  //   mutationFn: async (newClient: ClientFormValues) => {
+  //     try {
+  //       const res = await fetch(`https://jsonplaceholder.typicode.com/users`, {
+  //         method: "POST",
+  //         headers: {
+  //           "Content-Type": "application/json",
+  //         },
+  //         body: JSON.stringify(newClient),
+  //       });
+  //       if (!res) throw new Error("Failed to fetch clients");
+  //       // return newClient['name'];
+  //     } catch (error) {
+  //       return newClient;
+  //     }
+  //   },
+  //   onSuccess: (newItem) => {
+  //     // 1. Create the object WITH the status FIRST
+  //     const itemWithStatus = {
+  //       ...newItem,
+  //       status: form.getValues("status"),
+  //     };
+
+  //     // 2. Then update the cache with that object
+  //     queryClient.setQueryData(["clients"], (oldData: any) => {
+  //       return oldData ? [...oldData, itemWithStatus] : [itemWithStatus];
+  //     });
+
+  //     // 3. Reward & Reset
+  //     addPoint(10);
+  //     form.reset();
+  //     alert("Success! 10 XP added to your profile.");
+  //     addLog({
+  //       text: `Client "${itemWithStatus.name}" was added (+10 XP)`,
+  //       type: "client",
+  //     });
+  //   },
+  // });
+
+  const addClientMutation = useMutation({
     mutationFn: async (newClient: ClientFormValues) => {
-      try {
-        const res = await fetch(`https://jsonplaceholder.typicode.com/users`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(newClient),
-        });
-        if (!res) throw new Error("Failed to fetch clients");
-        // return newClient['name'];
-      } catch (error) {
-        return newClient;
-      }
+      const currentClients = await fetchClients();
+      const updatedClients = [...currentClients, newClient];
+      localStorage.setItem(storageKey, JSON.stringify(updatedClients));
+      return newClient;
     },
+
     onSuccess: (newItem) => {
       // 1. Create the object WITH the status FIRST
       const itemWithStatus = {
@@ -110,7 +163,7 @@ const MiniCRM = () => {
       };
 
       // 2. Then update the cache with that object
-      queryClient.setQueryData(["clients"], (oldData: any) => {
+      queryClient.setQueryData(["clients", storageKey], (oldData: any) => {
         return oldData ? [...oldData, itemWithStatus] : [itemWithStatus];
       });
 
@@ -125,16 +178,36 @@ const MiniCRM = () => {
     },
   });
 
+  // const deleteMutation = useMutation({
+  //   mutationFn: async (client: { id: number; name: string }) => {
+  //     await fetch(`https://jsonplaceholder.typicode.com/users/${client.id}`, {
+  //       method: "DELETE",
+  //     });
+  //     return client; // pass it through so onSuccess can use it
+  //   },
+  //   onSuccess: (deletedClient) => {
+  //     queryClient.setQueryData(["clients", storageKey], (oldData: any) => {
+  //       return oldData?.filter((client: any) => client.id !== deletedClient.id);
+  //     });
+  //     alert("Client removed from view!");
+  //     addLog({
+  //       text: `Client "${deletedClient.name}" was removed`,
+  //       type: "client",
+  //     });
+  //   },
+  // });
+
   const deleteMutation = useMutation({
-    mutationFn: async (client: { id: number; name: string }) => {
-      await fetch(`https://jsonplaceholder.typicode.com/users/${client.id}`, {
-        method: "DELETE",
-      });
-      return client; // pass it through so onSuccess can use it
+    mutationFn: async (newClient: ClientFormValues) => {
+      const currentClients = await fetchClients();
+      const updatedClients = [...currentClients, newClient];
+      localStorage.setItem(storageKey, JSON.stringify(updatedClients));
+      return newClient;
     },
+
     onSuccess: (deletedClient) => {
-      queryClient.setQueryData(["clients"], (oldData: any) => {
-        return oldData?.filter((client: any) => client.id !== deletedClient.id);
+      queryClient.setQueryData(["clients", storageKey], (oldData: any) => {
+        return oldData?.filter((client: any) => client.id !== deletedClient);
       });
       alert("Client removed from view!");
       addLog({
@@ -149,7 +222,7 @@ const MiniCRM = () => {
     console.log("Form Data:", data);
     // Logic: mutate(data)
 
-    addMutation.mutate(data);
+    addClientMutation.mutate(data);
   };
 
   return (
@@ -253,7 +326,13 @@ const MiniCRM = () => {
                   )}
                 />
 
-                <Button type="submit" className="w-full">
+                <Button
+                  type="submit"
+                  className="w-full"
+                  onClick={() => {
+                    addClientMutation;
+                  }}
+                >
                   Create Contact
                 </Button>
               </form>
