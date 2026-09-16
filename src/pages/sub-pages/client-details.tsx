@@ -14,6 +14,8 @@ import {
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
+import { storageKey } from "@/store/useAuthStore";
+import { useClientStorageKey } from "@/hooks/use-storage-key";
 
 export const ClientDetails = () => {
   const { id } = useParams();
@@ -22,14 +24,14 @@ export const ClientDetails = () => {
   const { tasks } = useTasks();
   const [title, setTitle] = useState(""); // For search input
   const { addTask } = useTasks();
-
+  const storageKey  = useClientStorageKey()
   // 1. DATA LOGIC:
   // First, check if we passed the client via state (Fastest)
   // If not, try to find the client in the TanStack Query cache ['clients']
   const location = useLocation();
-  const cachedClients = queryClient.getQueryData<any[]>(["clients"]);
+  const cachedClients = queryClient.getQueryData<any[]>(["clients", storageKey]);
   const client =
-    location.state?.client || cachedClients?.find((c) => c.id === Number(id));
+    location.state || cachedClients?.find((c) => c.id === Number(id));
 
   // 2. ANALYTICS LOGIC:
   // Filter tasks belonging to THIS client

@@ -1,46 +1,45 @@
 import { useState, useEffect } from "react";
 import { useUserStore } from "@/store/useUserStore";
 import { useActivityStore } from "@/store/useActivityStore";
+import { useAuthStore } from "@/store/useAuthStore";
+import { useTaskStorageKey } from "./use-storage-key";
 
 export interface TaskItem {
   id: number;
   title: string;
   priority: "High" | "Medium" | "Low";
-  status: "Backlog" | "In Progress" | "Completed";
+  status: "Backlog" | "In_Progress" | "Completed";
   clientId: number;
 }
 
 export const useTasks = () => {
   const addPoint = useUserStore((state) => state.addPoint);
   const addLog = useActivityStore((state) => state.addLog);
-  const logs = useActivityStore((state) => state.logs);
+  const currentUser = useAuthStore((state) => state.currentUser);
+  const storageKey = useTaskStorageKey();
+
   // 1. LAZY INITIALIZATION: Reads from disk ONLY once on boot
   const [tasks, setTasks] = useState<TaskItem[]>(() => {
-    const saved = localStorage.getItem("expedition-tasks");
+    const saved = localStorage.getItem(storageKey);
     if (saved) return JSON.parse(saved);
     // Default data if storage is empty
-    return [
-      {
-        id: 1,
-        title: "Secure Base Camp",
-        priority: "High",
-        status: "Completed",
-      },
-      {
-        id: 2,
-        title: "Gather Food Supplies",
-        priority: "High",
-        status: "Backlog",
-      },
-    ];
+    return [];
   });
-
   const [search, setSearch] = useState("");
 
   // 2. PERSISTENCE: Save to disk whenever tasks change
   useEffect(() => {
-    localStorage.setItem("expedition-tasks", JSON.stringify(tasks));
-  }, [tasks]);
+    localStorage.setItem(storageKey, JSON.stringify(tasks));
+  }, [tasks, storageKey]);
+
+  useEffect(() => {
+    const saved = localStorage.getItem(storageKey);
+    if (saved) {
+      setTasks(JSON.parse(saved));
+    } else {
+      setTasks([]);
+    }
+  }, [storageKey]);
 
   const addTask = (
     title: string,
@@ -62,15 +61,16 @@ export const useTasks = () => {
     } else {
       addPoint(5);
     }
+    console.log("LOGGING FOR:", useAuthStore.getState().currentUser?.email);
     addLog({ text: `Task "${title}" was created`, type: "task" });
   };
 
   const removeTask = (taskId: number) => {
     const taskTitle = tasks.find((t) => t.id === taskId)?.title;
     if (window.confirm("Are you sure you want to delete this task?")) {
-      setTasks((prev) => prev.filter((t) => t.id !== taskId));
+      setTasks((prev) => prev?.filter((t) => t.id !== taskId));
       addLog({ text: `Task ${taskTitle} has been removed`, type: "task" });
-      console.log(taskTitle)
+      console.log(taskTitle);
       console.log(addLog);
     }
   };
@@ -81,8 +81,8 @@ export const useTasks = () => {
       currentTasks.map((task) => {
         if (task.id !== taskId) return task;
         const nextStatus: Record<TaskItem["status"], TaskItem["status"]> = {
-          Backlog: "In Progress",
-          "In Progress": "Completed",
+          Backlog: "In_Progress",
+          In_Progress: "Completed",
           Completed: "Completed",
         };
         const nextState = nextStatus[task.status];
@@ -107,18 +107,18 @@ export const useTasks = () => {
   };
 
   // 3. ANALYTICS
-  const filteredTasks = tasks.filter((t) =>
-    t.title.toLowerCase().includes(search.toLowerCase()),
+  const filteredTasks = tasks?.filter((t) =>
+    t.title?.toLowerCase().includes(search?.toLowerCase()),
   );
   const completionRate = tasks.length
     ? Math.round(
-        (tasks.filter((t) => t.status === "Completed").length / tasks.length) *
+        (tasks?.filter((t) => t.status === "Completed").length / tasks.length) *
           100,
       )
     : 0;
   const efficiencyScore = tasks.reduce((acc, curr) => {
     if (curr.status === "Completed") return acc + 10;
-    if (curr.status === "In Progress") return acc + 5;
+    if (curr.status === "In_Progress") return acc + 5;
     return acc;
   }, 0);
 
