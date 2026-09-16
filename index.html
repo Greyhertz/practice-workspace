@@ -2,9 +2,28 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#fafafa" />
-    <title>Practice Workspace</title>
+    <title>Practice Lab</title>
+
+    <!-- 🚀 ADD THIS SCRIPT TO PREVENT THE DARK MODE FLASH -->
+    <script>
+      (function () {
+        try {
+          // next-themes saves preferences under the key "theme" by default
+          const savedTheme = localStorage.getItem("theme");
+          const systemPrefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+          
+          if (savedTheme === "dark" || (!savedTheme && systemPrefersDark)) {
+            document.documentElement.classList.add("dark");
+          } else {
+            document.documentElement.classList.remove("dark");
+          }
+        } catch (e) {
+          console.error("Theme injection error", e);
+        }
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

@@ -27,7 +27,8 @@ import { Button } from "../button";
 import { Card, CardHeader, CardTitle, CardContent } from "../card";
 import TaskManager from "@/pages/sub-pages/task-manger";
 import { useAuthStore } from "@/store/useAuthStore";
-
+import { Input } from "../input";
+import { ModeToggle } from "@/components/mode-toggle";
 const projects = [
   {
     id: "dashboard",
@@ -125,7 +126,7 @@ export default function Dashboard() {
       ) || projects[0];
 
   return (
-    <div className={dark ? "dark" : ""}>
+    // <div className={dark ? "dark" : ""}>
       <div className="min-h-screen bg-background text-foreground transition-colors duration-300">
         <div className="flex min-h-screen">
           {/* Sidebar */}
@@ -227,7 +228,7 @@ export default function Dashboard() {
                   <LogOut className="mr-2 h-4 w-4" />
                   Logout
                 </Button>
-                <Button
+                {/* <Button
                   variant="outline"
                   size="sm"
                   onClick={() => setDark(!dark)}
@@ -237,7 +238,8 @@ export default function Dashboard() {
                   ) : (
                     <Moon className="h-4 w-4" />
                   )}
-                </Button>
+                </Button> */}
+                <ModeToggle />
               </div>
             </header>
 
@@ -265,7 +267,7 @@ export default function Dashboard() {
                       </CardTitle>
                     </CardHeader>
                     <CardContent className="flex flex-wrap items-center gap-4">
-                      <input
+                      <Input
                         className="p-2 border rounded-md text-sm bg-background"
                         placeholder="Change your name..."
                         value={userName}
@@ -321,6 +323,6 @@ export default function Dashboard() {
           </main>
         </div>
       </div>
-    </div>
+    // </div>
   );
 }

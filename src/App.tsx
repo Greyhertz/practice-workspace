@@ -1,18 +1,21 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { Home } from "lucide-react";
-import { BrowserRouter as Router, Routes, Route, RouterProvider } from 'react-router-dom';
-import { DestinationDashboard } from "./pages/destination-dashboard";
-// import Dashboard from "./pages/dashboard";
+import { RouterProvider } from "react-router-dom";
 import { router } from "./routes";
+import { ThemeProvider } from "./proivider/theme-provider"; // Note: watch out for the typo in your folder name "proivider"
+
+const queryClient = new QueryClient(); // Move this outside the render to prevent resetting on every re-render
 
 export default function App() {
-  const queryClient = new QueryClient();
   return (
-    <QueryClientProvider client={queryClient}>
-      {/* <AppProviders> */}
-        {/* <Toaster richColors position="bottom-right" /> */}
-        <RouterProvider router={ router } />
-      {/* </AppProviders> */}
-    </QueryClientProvider>
+    <ThemeProvider 
+      attribute="class" 
+      defaultTheme="system" 
+      enableSystem
+      disableTransitionOnChange
+    >
+      <QueryClientProvider client={queryClient}>
+        <RouterProvider router={router} />
+      </QueryClientProvider>
+    </ThemeProvider>
   );
 }
