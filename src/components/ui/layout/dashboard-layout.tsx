@@ -99,7 +99,7 @@ const projects = [
 export default function Dashboard() {
   const [dark, setDark] = useState(false);
   const location = useLocation();
-  const userName = useUserStore((state) => state.userName);
+  const userName = useAuthStore((state) => state.currentUser?.name);
   const currentUser = useAuthStore((state) => state.currentUser);
   const points = useUserStore((state) => {
     // 1. Get the current user's email
@@ -173,7 +173,7 @@ export default function Dashboard() {
 
               <div className="border-t px-5 py-4 bg-muted/30">
                 <p className="text-sm font-bold text-primary truncate">
-                  {userName}
+                  {currentUser?.name}
                 </p>
                 <p className="text-xs text-muted-foreground">
                   Exp: {points} points
@@ -213,7 +213,7 @@ export default function Dashboard() {
                   </div>
                   <div className="overflow-hidden">
                     <p className="text-sm font-bold truncate">
-                      {currentUser?.name || "Guest"}
+                      {currentUser?.name}
                     </p>
                     <p className="text-[10px] text-muted-foreground truncate">
                       {currentUser?.email}
@@ -270,7 +270,7 @@ export default function Dashboard() {
                       <Input
                         className="p-2 border rounded-md text-sm bg-background"
                         placeholder="Change your name..."
-                        value={userName}
+                        value={currentUser?.name}
                         onChange={(e) =>
                           useUserStore.getState().updateName(e.target.value)
                         }
