@@ -6,19 +6,45 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { useActivityStore } from "@/store/useActivityStore";
+import { useAuthStore } from "@/store/useAuthStore";
 
 export function ActivityFeeds() {
-  const logs = useActivityStore((state) => state.logs);
+  const currentUser = useAuthStore((state) => state.currentUser);
+  const logs = useActivityStore((state) =>
+    currentUser ? (state.logsByUser[currentUser.email] ?? []) : [],
+  );
+  console.log("READING FOR:", currentUser?.email, "LOGS FOUND:", logs.length);
 
-  // if(logs.length  === 0) 
-  // {
-  //   return (
-  //     <div className="font-sans">No activity yet. Complete a task to get started.</div>
-  //   )
-  // }
-const clearAllLogs = () => {
+  const logText = (type: string, text: string) => {
+    const typeLabel = (
+      <span className="ml-4 shrink-0 text-muted-foreground">({type})</span>
+    );
 
-}
+    switch (type) {
+      case "task":
+        return (
+          <p className="flex w-full justify-between text-sm leading-6 text-blue-800">
+            <span>{text}</span>
+            {typeLabel}
+          </p>
+        );
+      case "xp":
+        return (
+          <p className="flex w-full justify-between text-sm leading-6 text-green-600">
+            <span>{text}</span>
+            {typeLabel}
+          </p>
+        );
+      default:
+        return (
+          <p className="flex w-full justify-between text-sm leading-6 text-red-500">
+            <span>{text}</span>
+            {typeLabel}
+          </p>
+        );
+    }
+  };
+
   return (
     <main className="min-h-screen bg-muted/30 px-6 py-10">
       <div className="mx-auto max-w-3xl space-y-8">
@@ -50,14 +76,7 @@ const clearAllLogs = () => {
                         {/* {typeof log === "string" ? log : JSON.stringify(log)} */}
                         {new Date(log.timestamp).toLocaleString()}
                       </p>
-                      <p className="text-sm leading-6 text-foreground">
-                        {/* {typeof log === "string" ? log : JSON.stringify(log)} */}
-                        {log.text}
-                      </p>
-                       <p className="text-sm leading-6 text-foreground">
-                        {/* {typeof log === "string" ? log : JSON.stringify(log)} */}
-                        {log.type}
-                      </p>
+                      {logText(log.type || "client", log.text)}
                     </div>
                   </div>
                 ))}
