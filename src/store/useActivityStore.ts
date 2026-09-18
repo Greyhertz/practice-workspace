@@ -9,29 +9,45 @@ interface LogActivity {
 }
 
 interface LogState {
-  logs: LogActivity[];
+  // logs: LogActivity[];
   addLog: (log: { text: string; type: "task" | "client" | "xp" }) => void;
+  logsByUser: Record<string, LogActivity[]>;
 }
 
 // const getCurrentUser = useAuthStore.getState().currentUser;
 export const useActivityStore = create<LogState>()(
   persist(
     (set) => ({
-      logs: [],
-      addLog: (log) =>
-        set((state) => ({
-          logs: [
-             {
-              id: Date.now().toString(),
-              text: log.text,
-              timestamp: new Date(),
-              type: log.type,
+      logsByUser: {},
+      addLog: (log) => {
+        const currentUser = useAuthStore.getState().currentUser;
+        if (!currentUser) return;
+        set((state) => {
+          const currentLogs = state.logsByUser[currentUser.email] ?? [];
+          const newLog: LogActivity = {
+            id: Date.now().toString(),
+            text: log.text,
+            timestamp: new Date(),
+            type: log.type,
+          };
+          return {
+            logsByUser: {
+              ...state.logsByUser,
+              [currentUser.email]: [newLog, ...currentLogs],
             },
-            ...state.logs,
-           
-          ],
-        })),
+          };
+        });
+      },
     }),
-    { name: "logs" },
+    {
+      name: "logs",
+      version: 1,
+      migrate: (persistedState: any, version: number) => {
+        if (version === 0) {
+          return { logsByUser: {} };
+        }
+        return persistedState;
+      },
+    },
   ),
 );
