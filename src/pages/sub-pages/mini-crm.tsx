@@ -56,6 +56,10 @@ const clientSchema = z.object({
 
 type ClientFormValues = z.infer<typeof clientSchema>;
 
+interface Client extends ClientFormValues {
+  id: number;
+}
+
 const MiniCRM = () => {
   const queryClient = useQueryClient();
   const currentUser = useAuthStore((state) => state.currentUser);
@@ -65,10 +69,7 @@ const MiniCRM = () => {
     currentUser ? (state.pointsByUser[currentUser.email] ?? 0) : 0;
     const userEmail = currentUser?.email;
 
-    if (!userEmail) return 0; // Default to 0 XP if no one is logged in
-
-    // 2. Look up this user's specific points from the new map structure
-    // (Falling back to 0 XP if this user doesn't have a record yet)
+    if (!userEmail) return 0;
     return state.pointsByUser?.[userEmail] || 0;
   });
   const addPoint = useUserStore((state) => state.addPoint);
@@ -84,12 +85,12 @@ const MiniCRM = () => {
   });
   // const points =
 
-  const fetchClients = async () => {
+  const fetchClients = async (): Promise<Client[]> => {
     const data = localStorage.getItem(storageKey);
     return data ? JSON.parse(data) : [];
   };
 
-  const { data: clients, isLoading: isLoadingDetails } = useQuery({
+  const { data: clients = [], isLoading: isLoadingDetails } = useQuery({
     queryKey: ["clients", storageKey],
     queryFn: fetchClients,
     refetchOnWindowFocus: false, // DON'T refetch when I click the alert 'OK'
@@ -150,29 +151,20 @@ const MiniCRM = () => {
   const addClientMutation = useMutation({
     mutationFn: async (newClient: ClientFormValues) => {
       const currentClients = await fetchClients();
-      const updatedClients = [...currentClients, newClient];
+      const clientWithId: Client = { ...newClient, id: Date.now() };
+      const updatedClients = [...currentClients, clientWithId];
       localStorage.setItem(storageKey, JSON.stringify(updatedClients));
-      return newClient;
+      return clientWithId; // return just the ONE new client
     },
-
     onSuccess: (newItem) => {
-      // 1. Create the object WITH the status FIRST
-      const itemWithStatus = {
-        ...newItem,
-        status: form.getValues("status"),
-      };
-
-      // 2. Then update the cache with that object
       queryClient.setQueryData(["clients", storageKey], (oldData: any) => {
-        return oldData ? [...oldData, itemWithStatus] : [itemWithStatus];
+        return oldData ? [...oldData, newItem] : [newItem];
       });
-
-      // 3. Reward & Reset
       addPoint(10);
       form.reset();
       alert("Success! 10 XP added to your profile.");
       addLog({
-        text: `Client "${itemWithStatus.name}" was added (+10 XP)`,
+        text: `Client "${newItem.name}" was added (+10 XP)`,
         type: "client",
       });
     },
@@ -198,16 +190,19 @@ const MiniCRM = () => {
   // });
 
   const deleteMutation = useMutation({
-    mutationFn: async (newClient: ClientFormValues) => {
+    mutationFn: async (client: Pick<Client, "id" | "name">) => {
       const currentClients = await fetchClients();
-      const updatedClients = [...currentClients, newClient];
+      const updatedClients = currentClients.filter(
+        (c) => String(c?.id) !== String(client.id),
+      );
       localStorage.setItem(storageKey, JSON.stringify(updatedClients));
-      return newClient;
+      return client;
     },
-
     onSuccess: (deletedClient) => {
       queryClient.setQueryData(["clients", storageKey], (oldData: any) => {
-        return oldData?.filter((client: any) => client.id !== deletedClient);
+        return (oldData ?? []).filter(
+          (client: Client) => String(client.id) !== String(deletedClient.id),
+        );
       });
       alert("Client removed from view!");
       addLog({
@@ -215,14 +210,33 @@ const MiniCRM = () => {
         type: "client",
       });
     },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ["clients", storageKey] });
+    },
   });
-
   // 3. SUBMIT HANDLER (Connect your useMutation here later)
-  const onSubmit = (data: ClientFormValues) => {
-    console.log("Form Data:", data);
-    // Logic: mutate(data)
-
+  const onSubmit = async (data: ClientFormValues) => {
+    const currentClients = await fetchClients();
+    const exists = currentClients.find(
+      (client: any) => client?.email.toLowerCase() === data?.email.toLowerCase(),
+    );
+    if (exists) {
+      console.log("onSubmit fired", data)
+      alert("A client with this email already exists!");
+      return;
+    }
     addClientMutation.mutate(data);
+  };
+
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case "Pro":
+        return <Badge className="bg-purple-600 text-white">{status}</Badge>;
+      case "Client":
+        return <Badge className="bg-green-600 text-white">{status}</Badge>;
+      default:
+        return <Badge className="bg-blue-700 text-white">{status}</Badge>;
+    }
   };
 
   return (
@@ -351,48 +365,51 @@ const MiniCRM = () => {
 
           <div className="grid gap-3">
             {/* REPLACE THIS PLACEHOLDER WITH data?.map(...) FROM useQuery */}
-            {clients?.map((client: any) => (
-              <Link to={`/dashboard/clients/${client.id}`} state={client}>
-                <Card
-                  key={client.id}
-                  className="hover:border-blue-200 transition-colors cursor-pointer group"
-                >
-                  <CardContent className="p-4 flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                      <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center font-bold text-muted-foreground">
-                        {client.id}
+            {clients
+              ?.filter((c: any) => c && c.id)
+              .map((client: any) => (
+                <Link to={`/dashboard/clients/${client.id}`} state={client}>
+                  <Card
+                    key={client.id}
+                    className="hover:border-blue-200 transition-colors cursor-pointer group"
+                  >
+                    <CardContent className="p-4 flex items-center justify-between">
+                      <div className="flex items-center gap-4">
+                        {/* <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center font-bold text-muted-foreground">
+                          {client.id}
+                        </div> */}
+                        <div>
+                          <p className="font-bold text-sm capitalize">
+                            {client.name}
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            {client.email}
+                          </p>
+                        </div>
                       </div>
-                      <div>
-                        <p className="font-bold text-sm capitalize">
-                          {client.name}
-                        </p>
-                        <p className="text-xs text-muted-foreground">
-                          {client.email}
-                        </p>
-                      </div>
-                    </div>
 
-                    <div className="flex items-center gap-4">
-                      <Badge
-                        variant={
-                          client.status === "Pro" ? "default" : "secondary"
-                        }
-                      >
-                        {client.status || "Lead"}
-                      </Badge>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="text-muted-foreground hover:text-destructive transition-colors"
-                        onClick={() => deleteMutation.mutate(client.id)}
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              </Link>
-            ))}
+                      <div className="flex items-center gap-4">
+                        {getStatusBadge(client.status || "Lead")}
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="text-muted-foreground hover:text-destructive transition-colors z-40"
+                          onClick={(event) => {
+                            event.preventDefault();
+                            event.stopPropagation();
+                            deleteMutation.mutate({
+                              id: client.id,
+                              name: client.name,
+                            });
+                          }}
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </Link>
+              ))}
           </div>
         </div>
       </div>
