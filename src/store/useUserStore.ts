@@ -34,7 +34,7 @@ import { useActivityStore } from "./useActivityStore";
 import { WindIcon } from "lucide-react";
 
 interface UserState {
-  userName: string;
+  // userName: string;
   pointsByUser: Record<string, number>;
   // updateName: (newName: string) => void;
   addPoint: (amount: number) => void;
@@ -44,7 +44,6 @@ interface UserState {
 export const useUserStore = create<UserState>()(
   persist(
     (set, get) => ({
-      userName: "Guest", // we'll revisit this separately, per your earlier note
       pointsByUser: {},
       // updateName: (newName) => set({ userName: newName }),
       addPoint: (amount) => {

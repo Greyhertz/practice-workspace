@@ -14,7 +14,7 @@ import {
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
-import { storageKey } from "@/store/useAuthStore";
+// import { storageKey } from "@/store/useAuthStore";
 import { useClientStorageKey } from "@/hooks/use-storage-key";
 
 export const ClientDetails = () => {
@@ -35,7 +35,7 @@ export const ClientDetails = () => {
 
   // 2. ANALYTICS LOGIC:
   // Filter tasks belonging to THIS client
-  const clientTasks = tasks.filter((t) => t.clientId === Number(id));;
+  const clientTasks = tasks.filter((t) => t.clientId === Number(id));
   const completedTasks = clientTasks.filter(
     (t) => t.status === "Completed",
   ).length;

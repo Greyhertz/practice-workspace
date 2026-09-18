@@ -36,11 +36,11 @@ const SignUpPage = () => {
     },
   });
 
-  const handleSignup = async (data: z.infer<typeof userSchema>) => {
-    const sucess = signup(data);
+  const handleSignup = async (data: UserFormValues) => {
+    const success = signup(data);
     console.log("User Data:", data);
 
-    if (sucess) {
+    if (success) {
       alert("Account created successfully! Please log in.");
       navigate("/login");
     } else {

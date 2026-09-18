@@ -1,6 +1,13 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
+import {
+  Form,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormControl,
+  FormMessage,
+} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { useAuthStore } from "@/store/useAuthStore";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -19,43 +26,41 @@ const userSchema = z.object({
 type UserFormValues = z.infer<typeof userSchema>;
 
 const LoginPage = () => {
-const navigate = useNavigate()
-const login = useAuthStore((state) => state.login); 
-const currentUser = useAuthStore.getState().currentUser;
+  const navigate = useNavigate();
+  const login = useAuthStore((state) => state.login);
+  const currentUser = useAuthStore.getState().currentUser;
 
+  const form = useForm({
+    resolver: zodResolver(userSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+  });
 
-const form = useForm({
-  resolver: zodResolver(userSchema),
-  defaultValues: {
-    email: "",
-    password: "",
-  },
-});
-
-const handleLogin = (data: any) => {
-  // if(data.email !== currentUser?.email || data.password !== currentUser?.password) {
-  //   form.setError("email", {
-  //     type: "manual",
-  //     message: "Invalid email or password. Please try again.",
-  //   });
-  //   return;
-  // }
+  const handleLogin = (data: UserFormValues) => {
+    // if(data.email !== currentUser?.email || data.password !== currentUser?.password) {
+    //   form.setError("email", {
+    //     type: "manual",
+    //     message: "Invalid email or password. Please try again.",
+    //   });
+    //   return;
+    // }
     const canEnter = login(data.email, data.password);
     console.log("User Data:", data);
-    if(canEnter) {
-      navigate("/dashboard")
+    if (canEnter) {
+      navigate("/dashboard");
     } else {
       form.setError("email", {
         type: "manual",
         message: "Invalid email or password. Please try again.",
-    })
+      });
     }
-}
+  };
 
-return (
-  <div>
-
-     <div className="flex justify-center items-center min-h-screen min-w-10">
+  return (
+    <div>
+      <div className="flex justify-center items-center min-h-screen min-w-10">
         <Card className="border grid shadow-lg w-full max-w-md">
           <CardHeader>
             <CardTitle className="text-lg flex items-center gap-2">
@@ -82,7 +87,6 @@ return (
                   )}
                 />
 
-
                 <FormField
                   control={form.control}
                   name="password"
@@ -100,7 +104,7 @@ return (
                           />
                         </div>
                       </FormControl>
-                      <FormMessage className="text-xs font-light"/>
+                      <FormMessage className="text-xs font-light" />
                     </FormItem>
                   )}
                 />
@@ -108,13 +112,21 @@ return (
                 <Button type="submit" className="w-full">
                   Login
                 </Button>
-                  <p className="text-sm">no account yet? <Link to="/sign-up" className="hover:underline text-destructive">SIGN-UP</Link></p>
+                <p className="text-sm">
+                  no account yet?{" "}
+                  <Link
+                    to="/sign-up"
+                    className="hover:underline text-destructive"
+                  >
+                    SIGN-UP
+                  </Link>
+                </p>
               </form>
             </Form>
           </CardContent>
         </Card>
       </div>
-  </div>
-)
-}
+    </div>
+  );
+};
 export default LoginPage;

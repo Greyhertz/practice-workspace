@@ -46,8 +46,13 @@ export const useAuthStore = create<AuthState>()(
         return false;
       },
 
-      logout: () => set({ currentUser: null }),
+      logout: () => {
+        if (window.confirm("Are you sure you want to logout")) {
+          set({ currentUser: null });
+        }
+      },
     }),
     { name: "auth-storage" },
   ),
 );
+
