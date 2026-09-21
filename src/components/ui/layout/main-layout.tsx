@@ -38,7 +38,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
           
           {/* 2. FLOATING MODE TOGGLE CONTAINER ADDED HERE */}
           <div className="fixed top-4 right-4 z-50">
-            <ModeToggle />
+            {/* <ModeToggle /> */}
           </div>
 
           <Navbar />

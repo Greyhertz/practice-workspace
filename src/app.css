@@ -64,3 +64,169 @@
     font-family: "JetBrains Mono", ui-monospace, monospace;
   }
 }
+
+/* ================================
+   HERO LETTER SHIMMER
+================================ */
+
+/* ================================
+   HERO LETTER EDGE ANIMATION
+================================ */
+
+.hero-letter {
+  display: inline-block;
+  position: relative;
+
+  /* Keep the actual text dark */
+  color: #171717;
+
+  /*
+    Very thin purple edge around the glyph.
+    The text itself does not become purple.
+  */
+  -webkit-text-stroke: 0.35px rgba(76, 29, 149, 0.35);
+
+  animation: hero-letter-edge 4s ease-in-out infinite;
+  animation-delay: var(--delay);
+
+  will-change:
+    text-shadow,
+    -webkit-text-stroke;
+}
+
+@keyframes hero-letter-edge {
+  0% {
+    -webkit-text-stroke-color: rgba(76, 29, 149, 0.2);
+
+    text-shadow:
+      -1px 0 0 rgba(76, 29, 149, 0),
+      0 -1px 0 rgba(76, 29, 149, 0.75),
+      1px 0 0 rgba(76, 29, 149, 0),
+      0 1px 0 rgba(76, 29, 149, 0);
+  }
+
+  25% {
+    -webkit-text-stroke-color: rgba(76, 29, 149, 0.55);
+
+    text-shadow:
+      1px 0 0 rgba(91, 33, 182, 0.75),
+      0 -1px 0 rgba(91, 33, 182, 0),
+      0 1px 0 rgba(91, 33, 182, 0),
+      -1px 0 0 rgba(91, 33, 182, 0);
+  }
+
+  50% {
+    -webkit-text-stroke-color: rgba(76, 29, 149, 0.2);
+
+    text-shadow:
+      0 1px 0 rgba(76, 29, 149, 0),
+      1px 0 0 rgba(76, 29, 149, 0),
+      0 -1px 0 rgba(76, 29, 149, 0),
+      -1px 0 0 rgba(76, 29, 149, 0.8);
+  }
+
+  75% {
+    -webkit-text-stroke-color: rgba(91, 33, 182, 0.55);
+
+    text-shadow:
+      0 1px 0 rgba(109, 40, 217, 0.7),
+      1px 0 0 rgba(109, 40, 217, 0),
+      0 -1px 0 rgba(109, 40, 217, 0),
+      -1px 0 0 rgba(109, 40, 217, 0);
+  }
+
+  100% {
+    -webkit-text-stroke-color: rgba(76, 29, 149, 0.2);
+
+    text-shadow:
+      -1px 0 0 rgba(76, 29, 149, 0),
+      0 -1px 0 rgba(76, 29, 149, 0.75),
+      1px 0 0 rgba(76, 29, 149, 0),
+      0 1px 0 rgba(76, 29, 149, 0);
+  }
+}
+
+/* ================================
+   OVERVIEW PURPLE ENERGY BORDER
+================================ */
+
+.hero-overview {
+  position: relative;
+  isolation: isolate;
+}
+
+.hero-overview::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  z-index: -1;
+
+  border-radius: 1rem;
+  padding: 1px;
+
+  background: conic-gradient(
+    from 0deg,
+    transparent 0deg,
+    transparent 45deg,
+    rgba(76, 29, 149, 0.15) 70deg,
+    rgba(91, 33, 182, 0.75) 105deg,
+    rgba(124, 58, 237, 0.9) 125deg,
+    rgba(91, 33, 182, 0.35) 155deg,
+    transparent 200deg,
+    transparent 360deg
+  );
+
+  animation: overview-border-spin 7s linear infinite;
+
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+}
+
+.hero-overview::after {
+  content: "";
+  position: absolute;
+  inset: -20px;
+  z-index: -2;
+
+  border-radius: 2rem;
+
+  background: conic-gradient(
+    from 0deg,
+    transparent 0%,
+    rgba(91, 33, 182, 0.12) 12%,
+    transparent 25%
+  );
+
+  filter: blur(25px);
+  opacity: 0.5;
+
+  animation: overview-glow-spin 9s linear infinite;
+}
+
+@keyframes overview-border-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes overview-glow-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ================================
+   REDUCED MOTION
+================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-letter,
+  .hero-overview::before,
+  .hero-overview::after {
+    animation: none;
+  }
+}

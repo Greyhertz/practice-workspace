@@ -33,7 +33,7 @@ export function ModeToggle() {
     <Button
       variant="outline"
       onClick={toggleTheme}
-      className="group relative h-10 w-10 overflow-hidden rounded-full p-0 transition-all duration-300 ease-in-out hover:w-20 bg-background"
+      className="group relative h-8 w-8 overflow-hidden rounded-full p-0 transition-all duration-300 ease-in-out hover:w-20 bg-background"
     >
       <div className="relative flex h-full w-full items-center justify-center">
         {/* Track container that moves horizontally on hover */}
