@@ -16,6 +16,7 @@ import { useForm } from "react-hook-form";
 import { Link, useNavigate } from "react-router-dom";
 import z from "zod";
 import { Lock } from "lucide-react";
+import { toast } from "sonner";
 
 const userSchema = z.object({
   // name: z.string().min(2, "Name must be at least 2 characters"),
@@ -38,6 +39,7 @@ const LoginPage = () => {
     },
   });
 
+
   const handleLogin = (data: UserFormValues) => {
     // if(data.email !== currentUser?.email || data.password !== currentUser?.password) {
     //   form.setError("email", {
@@ -46,9 +48,10 @@ const LoginPage = () => {
     //   });
     //   return;
     // }
-    const canEnter = login(data.email, data.password);
+    const success = login(data.email, data.password);
     console.log("User Data:", data);
-    if (canEnter) {
+    if (success) {
+      toast.success(`${currentUser} logged in`)
       navigate("/dashboard");
     } else {
       form.setError("email", {

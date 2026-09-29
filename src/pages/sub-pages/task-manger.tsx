@@ -24,6 +24,7 @@ import {
 import { useAuthStore } from "@/store/useAuthStore";
 import { useTranslation } from "@/hooks/useTranslation";
 import { useLanguageStore } from "@/store/useLanguageStore";
+import { ConfirmationDialog } from "@/components/confirmation-dialog";
 
 const TaskManager = () => {
   const [newTitle, setNewTitle] = useState("");
@@ -107,13 +108,17 @@ const TaskManager = () => {
             <p className="text-[10px] uppercase font-bold">{t("efficiency")}</p>
           </CardContent>
         </Card>
-        <Button
-          variant="destructive"
-          onClick={clearAll}
-          className="h-full rounded-2xl"
-        >
-          <Trash2 className="mr-2 h-4 w-4" /> {t("clearAll")}
-        </Button>
+        <ConfirmationDialog
+          trigger={
+            <Button variant="destructive" className="h-full rounded-2xl">
+              <Trash2 className="mr-2 h-4 w-4" /> {t("clearAll")}
+            </Button>
+          }
+          title="Clear all tasks?"
+          description="This will permanently remove every task from your list."
+          confirmLabel="Clear tasks"
+          onConfirm={clearAll}
+        />
       </div>
 
       <Card>
@@ -147,7 +152,7 @@ const TaskManager = () => {
               </Select>
               <Button
                 onClick={() => {
-                  addTask(newTitle, newPriority);
+                  addTask(newTitle, newPriority, 0);
                   setNewTitle("");
                 }}
               >
@@ -179,14 +184,22 @@ const TaskManager = () => {
                   >
                     {task.status}
                   </Button>
-                  <Button
-                    size="icon"
-                    variant="ghost"
-                    className="opacity-0 group-hover:opacity-100"
-                    onClick={() => removeTask(task.id)}
-                  >
-                    <Trash2 className="h-4 w-4 text-red-500" />
-                  </Button>
+                  <ConfirmationDialog
+                    trigger={
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        aria-label={`Delete task ${task.title}`}
+                        className="opacity-0 group-hover:opacity-100"
+                      >
+                        <Trash2 className="h-4 w-4 text-red-500" />
+                      </Button>
+                    }
+                    title="Delete this task?"
+                    description={`“${task.title}” will be permanently removed.`}
+                    confirmLabel="Delete task"
+                    onConfirm={() => removeTask(task.id)}
+                  />
                 </div>
               </div>
             ))}

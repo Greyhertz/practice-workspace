@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Plus, Loader2, Plane, Trash2, X } from 'lucide-react';
+import { toast } from 'sonner';
 
 // --- API FUNCTIONS ---
 const fetchDestinations = async () => {
@@ -51,7 +52,7 @@ export const DestinationDashboard = () => {
       queryClient.setQueryData(['clients'], (old: any) => [newlyCreatedItem, ...old]);
     }
 
-    alert('Client added to UI!');
+    toast.success('Client added to UI!');
     setTitle('');
   }
   });

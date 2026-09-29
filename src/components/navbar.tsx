@@ -13,6 +13,7 @@ import {
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
+import { ConfirmationDialog } from "@/components/confirmation-dialog";
 import {
   Popover,
   PopoverContent,
@@ -168,14 +169,21 @@ export const Navbar = () => {
                   Dashboard
                 </Button>
 
-                <Button
-                  variant="ghost"
-                  onClick={logout}
-                  className="h-10 justify-start gap-3 rounded-lg text-sm text-destructive hover:bg-destructive/10 hover:text-destructive"
-                >
-                  <LogOut className="h-4 w-4" />
-                  Sign out
-                </Button>
+                <ConfirmationDialog
+                  trigger={
+                    <Button
+                      variant="ghost"
+                      className="h-10 justify-start gap-3 rounded-lg text-sm text-destructive hover:bg-destructive/10 hover:text-destructive"
+                    >
+                      <LogOut className="h-4 w-4" />
+                      Sign out
+                    </Button>
+                  }
+                  title="Sign out?"
+                  description="You will be signed out of your account."
+                  confirmLabel="Sign out"
+                  onConfirm={logout}
+                />
               </div>
             </PopoverContent>
           </Popover>

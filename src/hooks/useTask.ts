@@ -3,6 +3,7 @@ import { useUserStore } from "@/store/useUserStore";
 import { useActivityStore } from "@/store/useActivityStore";
 import { useAuthStore } from "@/store/useAuthStore";
 import { useTaskStorageKey } from "./use-storage-key";
+import { toast } from "sonner";
 
 export interface TaskItem {
   id: number;
@@ -47,7 +48,7 @@ export const useTasks = () => {
     clientId: number,
   ) => {
     if (title.trim() === "")
-      return alert("Add a title! Title cannot be empty!"); // Prevent adding empty tasks
+      return toast.error("Add a title! Title cannot be empty!"); // Prevent adding empty tasks
     const newTask: TaskItem = {
       id: Date.now(),
       title,
@@ -67,12 +68,8 @@ export const useTasks = () => {
 
   const removeTask = (taskId: number) => {
     const taskTitle = tasks.find((t) => t.id === taskId)?.title;
-    if (window.confirm("Are you sure you want to delete this task?")) {
-      setTasks((prev) => prev?.filter((t) => t.id !== taskId));
-      addLog({ text: `Task ${taskTitle} has been removed`, type: "task" });
-      console.log(taskTitle);
-      console.log(addLog);
-    }
+    setTasks((prev) => prev?.filter((t) => t.id !== taskId));
+    addLog({ text: `Task ${taskTitle} has been removed`, type: "task" });
   };
 
   const clickToComplete = (taskId: number) => {
@@ -100,10 +97,8 @@ export const useTasks = () => {
   };
 
   const clearAll = () => {
-    if (window.confirm("Are you sure you want to clear all tasks?")) {
-      setTasks([]);
-      addLog({ text: `Cleared al tasks`, type: "task" });
-    }
+    setTasks([]);
+    addLog({ text: `Cleared al tasks`, type: "task" });
   };
 
   // 3. ANALYTICS

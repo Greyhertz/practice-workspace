@@ -18,6 +18,7 @@ import {
   ResponsiveContainer,
   Cell,
 } from "recharts";
+import { toast } from "sonner";
 
 interface ItemProps {
   id: number;
@@ -57,7 +58,7 @@ const Analytics = () => {
   const isOverweight = totalWeight > 8;
 
   const handleAddItems = () => {
-    if (!name || !weight || !price) return alert("Please fill all fields");
+    if (!name || !weight || !price) return toast.warning("Please fill all fields");
 
     const newItem: ItemProps = {
       id: Date.now(),

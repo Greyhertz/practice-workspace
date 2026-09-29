@@ -5,5 +5,6 @@
   },
   "files.autoSave": "afterDelay",
   "editor.tabSize": 2,
-  "editor.fontFamily": "JetBrains Mono, Consolas, monospace"
+  "editor.fontFamily": "JetBrains Mono, Consolas, monospace",
+  "github.copilot.chat.localIndex.enabled": false
 }

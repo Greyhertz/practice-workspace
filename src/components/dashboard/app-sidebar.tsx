@@ -19,7 +19,7 @@ import {
 } from "lucide-react";
 
 import { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 
 import {
   Sidebar,
@@ -39,6 +39,7 @@ import {
 } from "@/components/ui/popover";
 
 import { Button } from "@/components/ui/button";
+import { ConfirmationDialog } from "@/components/confirmation-dialog";
 
 import { useAuthStore } from "@/store/useAuthStore";
 import { useUserStore } from "@/store/useUserStore";
@@ -99,7 +100,7 @@ export function AppSidebar() {
 
   const currentUser = useAuthStore((state) => state.currentUser);
   const logout = useAuthStore((state) => state.logout);
-
+  const navigate = useNavigate();
   const profileInitials =
     currentUser?.name
       ?.trim()
@@ -222,7 +223,7 @@ export function AppSidebar() {
             hover:text-foreground
           "
               >
-                <ChevronLeft className="h-3.5 w-3.5" />
+                <ChevronLeft className="h-3.5 w-3.5 text-primary" />
               </button>
             </>
           )}
@@ -379,20 +380,27 @@ export function AppSidebar() {
               <Button
                 variant="ghost"
                 className="h-9 justify-start gap-3 rounded-lg px-3 text-xs font-normal hover:bg-muted"
-                onClick={() => setProfileOpen(false)}
+                onClick={() => navigate("settings")}
               >
                 <Settings className="h-3.5 w-3.5" />
                 Settings
               </Button>
 
-              <Button
-                variant="ghost"
-                onClick={logout}
-                className="h-9 justify-start gap-3 rounded-lg px-3 text-xs font-normal text-destructive hover:bg-destructive/10 hover:text-destructive"
-              >
-                <LogOut className="h-3.5 w-3.5" />
-                Sign out
-              </Button>
+              <ConfirmationDialog
+                trigger={
+                  <Button
+                    variant="ghost"
+                    className="h-9 justify-start gap-3 rounded-lg px-3 text-xs font-normal text-destructive hover:bg-destructive/10 hover:text-destructive"
+                  >
+                    <LogOut className="h-3.5 w-3.5" />
+                    Sign out
+                  </Button>
+                }
+                title="Sign out?"
+                description="You will be signed out of your account."
+                confirmLabel="Sign out"
+                onConfirm={logout}
+              />
             </div>
           </PopoverContent>
         </Popover>

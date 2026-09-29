@@ -15,6 +15,7 @@ import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import { Form } from "@/components/ui/form";
 import z from "zod";
+import { toast } from "sonner";
 
 const userSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
@@ -41,8 +42,8 @@ const SignUpPage = () => {
     console.log("User Data:", data);
 
     if (success) {
-      alert("Account created successfully! Please log in.");
-      navigate("/login");
+      toast.success("Account created successfully! Please log in.");
+      navigate("/homepage");
     } else {
       form.setError("email", {
         type: "manual",

@@ -44,6 +44,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useActivityStore } from "@/store/useActivityStore";
 import { useAuthStore } from "@/store/useAuthStore";
 import { useClientStorageKey } from "@/hooks/use-storage-key";
+import { toast } from "sonner";
 
 // 1. ZOD SCHEMA
 const clientSchema = z.object({
@@ -59,6 +60,22 @@ type ClientFormValues = z.infer<typeof clientSchema>;
 interface Client extends ClientFormValues {
   id: number;
 }
+
+export const useClientCount = () => {
+  const storageKey = useClientStorageKey();
+  const { data: clients = [] } = useQuery<Client[]>({
+    queryKey: ["clients", storageKey],
+    queryFn: async () => {
+      const data = localStorage.getItem(storageKey);
+      return data ? JSON.parse(data) : [];
+    },
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+    refetchOnReconnect: false,
+  });
+
+  return clients.length;
+};
 
 const MiniCRM = () => {
   const queryClient = useQueryClient();
@@ -83,7 +100,6 @@ const MiniCRM = () => {
       status: "Lead",
     },
   });
-  // const points =
 
   const fetchClients = async (): Promise<Client[]> => {
     const data = localStorage.getItem(storageKey);
@@ -162,7 +178,7 @@ const MiniCRM = () => {
       });
       addPoint(10);
       form.reset();
-      alert("Success! 10 XP added to your profile.");
+      toast.success("Success! 10 XP added to your profile.");
       addLog({
         text: `Client "${newItem.name}" was added (+10 XP)`,
         type: "client",
@@ -204,7 +220,7 @@ const MiniCRM = () => {
           (client: Client) => String(client.id) !== String(deletedClient.id),
         );
       });
-      alert("Client removed from view!");
+      toast.message("Client removed from view!");
       addLog({
         text: `Client "${deletedClient.name}" was removed`,
         type: "client",
@@ -218,11 +234,12 @@ const MiniCRM = () => {
   const onSubmit = async (data: ClientFormValues) => {
     const currentClients = await fetchClients();
     const exists = currentClients.find(
-      (client: any) => client?.email.toLowerCase() === data?.email.toLowerCase(),
+      (client: any) =>
+        client?.email.toLowerCase() === data?.email.toLowerCase(),
     );
     if (exists) {
-      console.log("onSubmit fired", data)
-      alert("A client with this email already exists!");
+      console.log("onSubmit fired", data);
+      toast.warning("A client with this email already exists!");
       return;
     }
     addClientMutation.mutate(data);
@@ -239,6 +256,11 @@ const MiniCRM = () => {
     }
   };
 
+  const currentUserClient = clients.filter(
+    (client) => client.email === currentUser?.email,
+  );
+
+  const clientCount = useClientCount();
   return (
     <div className="space-y-8 pb-20">
       {/* HEADER SECTION */}
@@ -259,8 +281,18 @@ const MiniCRM = () => {
               <Briefcase className="w-5 h-5 text-blue-600" /> CRM Dashboard
             </CardTitle>
             <CardDescription>
-              Manage your clients and track your learning progress.
+              Manage your clients and track your learning progress. You have {clientCount} client{clientCount === 1 ? "" : "s"}.
             </CardDescription>
+          </CardHeader>
+        </Card>
+        <Card>
+          <CardHeader className="pb-2">
+            <CardDescription className="uppercase text-[10px] font-bold">
+              Client Stats
+            </CardDescription>
+            <CardTitle className="text-2xl flex items-center gap-2">
+              <Users className="w-5 h-5 text-blue-600" /> {clientCount}
+            </CardTitle>
           </CardHeader>
         </Card>
       </div>

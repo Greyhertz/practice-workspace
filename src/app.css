@@ -65,90 +65,85 @@
   }
 }
 
-/* ================================
-   HERO LETTER SHIMMER
-================================ */
 
-/* ================================
+/* =================================
    HERO LETTER EDGE ANIMATION
-================================ */
+================================= */
 
 .hero-letter {
   display: inline-block;
   position: relative;
 
-  /* Keep the actual text dark */
-  color: #171717;
+  /*
+    Theme-aware text color.
+    Light mode = dark text
+    Dark mode = bright text
+  */
+  color: hsl(var(--foreground));
 
   /*
-    Very thin purple edge around the glyph.
-    The text itself does not become purple.
+    Very thin purple outline.
+    The text itself remains its normal theme color.
   */
-  -webkit-text-stroke: 0.35px rgba(76, 29, 149, 0.35);
+  -webkit-text-stroke: 0.3px rgba(124, 58, 237, 0.45);
 
   animation: hero-letter-edge 4s ease-in-out infinite;
   animation-delay: var(--delay);
 
-  will-change:
-    text-shadow,
-    -webkit-text-stroke;
+  will-change: text-shadow, -webkit-text-stroke;
 }
 
 @keyframes hero-letter-edge {
+  /* Top edge */
   0% {
-    -webkit-text-stroke-color: rgba(76, 29, 149, 0.2);
+    -webkit-text-stroke-color: rgba(124, 58, 237, 0.3);
 
     text-shadow:
-      -1px 0 0 rgba(76, 29, 149, 0),
-      0 -1px 0 rgba(76, 29, 149, 0.75),
-      1px 0 0 rgba(76, 29, 149, 0),
-      0 1px 0 rgba(76, 29, 149, 0);
+      0 -1px 0 rgba(124, 58, 237, 0.9),
+      0 0 0 rgba(124, 58, 237, 0);
   }
 
+  /* Right edge */
   25% {
-    -webkit-text-stroke-color: rgba(76, 29, 149, 0.55);
+    -webkit-text-stroke-color: rgba(139, 92, 246, 0.65);
 
     text-shadow:
-      1px 0 0 rgba(91, 33, 182, 0.75),
-      0 -1px 0 rgba(91, 33, 182, 0),
-      0 1px 0 rgba(91, 33, 182, 0),
-      -1px 0 0 rgba(91, 33, 182, 0);
+      1px 0 0 rgba(139, 92, 246, 0.95),
+      0 0 2px rgba(124, 58, 237, 0.25);
   }
 
+  /* Bottom edge */
   50% {
-    -webkit-text-stroke-color: rgba(76, 29, 149, 0.2);
+    -webkit-text-stroke-color: rgba(124, 58, 237, 0.3);
 
     text-shadow:
-      0 1px 0 rgba(76, 29, 149, 0),
-      1px 0 0 rgba(76, 29, 149, 0),
-      0 -1px 0 rgba(76, 29, 149, 0),
-      -1px 0 0 rgba(76, 29, 149, 0.8);
+      0 1px 0 rgba(124, 58, 237, 0.9),
+      0 0 0 rgba(124, 58, 237, 0);
   }
 
+  /* Left edge */
   75% {
-    -webkit-text-stroke-color: rgba(91, 33, 182, 0.55);
+    -webkit-text-stroke-color: rgba(139, 92, 246, 0.65);
 
     text-shadow:
-      0 1px 0 rgba(109, 40, 217, 0.7),
-      1px 0 0 rgba(109, 40, 217, 0),
-      0 -1px 0 rgba(109, 40, 217, 0),
-      -1px 0 0 rgba(109, 40, 217, 0);
+      -1px 0 0 rgba(139, 92, 246, 0.95),
+      0 0 2px rgba(124, 58, 237, 0.25);
   }
 
+  /* Back to top */
   100% {
-    -webkit-text-stroke-color: rgba(76, 29, 149, 0.2);
+    -webkit-text-stroke-color: rgba(124, 58, 237, 0.3);
 
     text-shadow:
-      -1px 0 0 rgba(76, 29, 149, 0),
-      0 -1px 0 rgba(76, 29, 149, 0.75),
-      1px 0 0 rgba(76, 29, 149, 0),
-      0 1px 0 rgba(76, 29, 149, 0);
+      0 -1px 0 rgba(124, 58, 237, 0.9),
+      0 0 0 rgba(124, 58, 237, 0);
   }
 }
 
-/* ================================
+
+/* =================================
    OVERVIEW PURPLE ENERGY BORDER
-================================ */
+================================= */
 
 .hero-overview {
   position: relative;
@@ -157,6 +152,7 @@
 
 .hero-overview::before {
   content: "";
+
   position: absolute;
   inset: -1px;
   z-index: -1;
@@ -168,10 +164,12 @@
     from 0deg,
     transparent 0deg,
     transparent 45deg,
+
     rgba(76, 29, 149, 0.15) 70deg,
     rgba(91, 33, 182, 0.75) 105deg,
     rgba(124, 58, 237, 0.9) 125deg,
     rgba(91, 33, 182, 0.35) 155deg,
+
     transparent 200deg,
     transparent 360deg
   );
@@ -186,8 +184,14 @@
   mask-composite: exclude;
 }
 
+
+/* =================================
+   OVERVIEW SOFT PURPLE GLOW
+================================= */
+
 .hero-overview::after {
   content: "";
+
   position: absolute;
   inset: -20px;
   z-index: -2;
@@ -207,6 +211,11 @@
   animation: overview-glow-spin 9s linear infinite;
 }
 
+
+/* =================================
+   OVERVIEW ANIMATIONS
+================================= */
+
 @keyframes overview-border-spin {
   to {
     transform: rotate(360deg);
@@ -219,9 +228,48 @@
   }
 }
 
-/* ================================
+
+/* =================================
+   SONNER TOAST VARIANTS
+================================= */
+
+[data-sonner-toast].app-toast-success {
+  --toast-accent: #15803d;
+  border-inline-start: 4px solid var(--toast-accent);
+}
+
+[data-sonner-toast].app-toast-warning {
+  --toast-accent: #b45309;
+  border-inline-start: 4px solid var(--toast-accent);
+}
+
+[data-sonner-toast].app-toast-error {
+  --toast-accent: #b91c1c;
+  border-inline-start: 4px solid var(--toast-accent);
+}
+
+[data-sonner-toast].app-toast-success [data-icon],
+[data-sonner-toast].app-toast-warning [data-icon],
+[data-sonner-toast].app-toast-error [data-icon] {
+  color: var(--toast-accent);
+}
+
+.dark [data-sonner-toast].app-toast-success {
+  --toast-accent: #4ade80;
+}
+
+.dark [data-sonner-toast].app-toast-warning {
+  --toast-accent: #fbbf24;
+}
+
+.dark [data-sonner-toast].app-toast-error {
+  --toast-accent: #f87171;
+}
+
+
+/* =================================
    REDUCED MOTION
-================================ */
+================================= */
 
 @media (prefers-reduced-motion: reduce) {
   .hero-letter,

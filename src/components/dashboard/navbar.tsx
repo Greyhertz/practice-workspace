@@ -3,7 +3,9 @@ import {
   ChevronDown,
   ChevronUp,
   CircleHelp,
+  HomeIcon,
   LogOut,
+  LucideHome,
   Search,
   Settings,
   UserRound,
@@ -12,6 +14,7 @@ import {
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
+import { ConfirmationDialog } from "@/components/confirmation-dialog";
 import {
   Popover,
   PopoverContent,
@@ -20,15 +23,15 @@ import {
 
 import { useAuthStore } from "@/store/useAuthStore";
 import { ModeToggle } from "@/components/mode-toggle";
+import { useNavigate } from "react-router-dom";
 
 export const Navbar = () => {
   const [profileOpen, setProfileOpen] = useState(false);
-
+  const navigate = useNavigate();
   const currentUser = useAuthStore((state) => state.currentUser);
   const logout = useAuthStore((state) => state.logout);
 
-  const firstName =
-    currentUser?.name?.trim().split(/\s+/)[0] || "there";
+  const firstName = currentUser?.name?.trim().split(/\s+/)[0] || "there";
 
   const profileInitials =
     currentUser?.name
@@ -51,7 +54,7 @@ export const Navbar = () => {
           <input
             type="search"
             placeholder="Search anything..."
-            className="h-10 w-full rounded-lg bg-muted/40 pl-9 pr-14 text-sm outline-none transition-colors placeholder:text-muted-foreground focus:bg-muted/60"
+            className="h-10 w-full rounded-lg bg-muted/40 pl-9 pr-14 text-sm outline-none transition-colors placeholder:text-muted-foreground focus:bg-muted/60  border-2"
           />
 
           <div className="absolute right-2 top-1/2 flex -translate-y-1/2 items-center gap-1 rounded-md bg-background px-1.5 py-1 text-[10px] text-muted-foreground shadow-sm">
@@ -59,16 +62,22 @@ export const Navbar = () => {
             <span>K</span>
           </div>
         </div>
-
+        <div>
+          <LucideHome
+            fontWeight={30}
+            fill=""
+            color="black"
+            onClick={() => navigate("/")}
+            className="cursor-pointer"
+          />
+        </div>
         {/* Mobile title */}
         <div className="lg:hidden">
           <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
             Practice Lab
           </p>
 
-          <p className="text-sm font-semibold">
-            Workspace
-          </p>
+          <p className="text-sm font-semibold">Workspace</p>
         </div>
       </div>
 
@@ -165,14 +174,21 @@ export const Navbar = () => {
                 Settings
               </Button>
 
-              <Button
-                variant="ghost"
-                onClick={logout}
-                className="h-10 justify-start gap-3 rounded-lg text-sm text-destructive hover:bg-destructive/10 hover:text-destructive"
-              >
-                <LogOut className="h-4 w-4" />
-                Sign out
-              </Button>
+              <ConfirmationDialog
+                trigger={
+                  <Button
+                    variant="ghost"
+                    className="h-10 justify-start gap-3 rounded-lg text-sm text-destructive hover:bg-destructive/10 hover:text-destructive"
+                  >
+                    <LogOut className="h-4 w-4" />
+                    Sign out
+                  </Button>
+                }
+                title="Sign out?"
+                description="You will be signed out of your account."
+                confirmLabel="Sign out"
+                onConfirm={logout}
+              />
             </div>
           </PopoverContent>
         </Popover>
