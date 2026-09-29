@@ -11,7 +11,7 @@ interface AuthState {
   [x: string]: any;
   registeredUsers: UserAccount[]; // Our "Database"
   currentUser: UserAccount | null; // Our "Session"
-
+  updateName: (newName: string) => void;
   signup: (newUser: UserAccount) => boolean;
   login: (email: string, pass: string) => boolean;
   logout: () => void;
@@ -47,12 +47,24 @@ export const useAuthStore = create<AuthState>()(
       },
 
       logout: () => {
-        if (window.confirm("Are you sure you want to logout")) {
-          set({ currentUser: null });
-        }
+        set({ currentUser: null });
+      },
+
+      updateName: (newName: string) => {
+        set((state) => {
+          if (!state.currentUser) return state; // no-op if nobody's logged in
+
+          const updatedUser = { ...state.currentUser, name: newName };
+
+          return {
+            currentUser: updatedUser,
+            registeredUsers: state.registeredUsers.map((u) =>
+              u.email === updatedUser.email ? updatedUser : u,
+            ),
+          };
+        });
       },
     }),
     { name: "auth-storage" },
   ),
 );
-
